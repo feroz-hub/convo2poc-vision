@@ -1,0 +1,92 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { AppProviders } from '@/app/providers';
+import { routeObjects } from '@/app/routeObjects';
+import { routes } from '@/app/routes';
+import { useDemoStore } from '@/store/demoStore';
+const renderRoute = (path = '/') =>
+  render(
+    <AppProviders>
+      <RouterProvider
+        router={createMemoryRouter(routeObjects, { initialEntries: [path] })}
+      />
+    </AppProviders>,
+  );
+describe('application shell and route placeholders', () => {
+  beforeEach(() => useDemoStore.getState().reset());
+  it.each(routes.filter((route) => route.path !== '/'))(
+    'renders $path and marks its navigation active',
+    (route) => {
+      renderRoute(route.path);
+      expect(
+        screen.getByRole('heading', { level: 1, name: route.label }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: route.label })).toHaveAttribute(
+        'aria-current',
+        'page',
+      );
+      expect(
+        screen.getByText(`Planned for Phase ${route.phase}`),
+      ).toBeInTheDocument();
+    },
+  );
+  it('supports manual navigation independently of demo state', async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Turn client conversations into validated working POCs',
+    });
+    await user.click(screen.getByRole('link', { name: 'POC Scope' }));
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'POC Scope' }),
+    ).toBeInTheDocument();
+    expect(useDemoStore.getState().scopeApproved).toBe(false);
+  });
+  it('disables unavailable playback but resets state without refreshing', async () => {
+    const user = userEvent.setup();
+    useDemoStore.setState({
+      currentPocVersion: 'v2',
+      detectedRequirementIds: ['FR-001'],
+    });
+    renderRoute('/requirements');
+    expect(screen.getByRole('button', { name: 'Run Demo' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
+    expect(screen.getByText('POC v1')).toBeInTheDocument();
+    expect(useDemoStore.getState().detectedRequirementIds).toEqual([]);
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Requirement Intelligence',
+      }),
+    ).toBeInTheDocument();
+  });
+  it('opens navigation, moves focus, and closes on Escape', async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Turn client conversations into validated working POCs',
+    });
+    const trigger = screen.getByRole('button', { name: 'Open navigation' });
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('button', { name: 'Close navigation' }),
+    ).toHaveFocus();
+    await user.keyboard('{Escape}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveFocus();
+  });
+  it('provides a recovery route for an unknown URL', () => {
+    renderRoute('/missing');
+    expect(
+      screen.getByRole('heading', { name: 'Workspace not found' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Return to Overview' }),
+    ).toHaveAttribute('href', '/');
+  });
+});
