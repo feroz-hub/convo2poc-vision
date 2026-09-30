@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b1120" />
+    <meta name="theme-color" content="#f4f7fc" />
     <meta
       name="description"
       content="Convo2POC: an enterprise-governed Conversation-to-POC vision prototype."
     />
     <script>
-      // Apply the saved presentation theme before paint; dark remains the default.
+      // Apply the saved presentation theme before paint; light remains the default.
       try {
         document.documentElement.classList.toggle(
           'dark',
-          localStorage.getItem('convo2poc-theme') !== 'light',
+          localStorage.getItem('convo2poc-theme') === 'dark',
         );
       } catch {}
     </script>

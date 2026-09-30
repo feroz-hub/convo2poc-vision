@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { AppProviders } from '@/app/providers';
 import { routeObjects } from '@/app/routeObjects';
-import { workflowStages, differentiators } from '@/data/overview';
+import {
+  workflowStages,
+  processComparison,
+  storyboardFrames,
+  heroStory,
+} from '@/data/overview';
 import {
   catalogMetrics,
   deriveCatalogMetrics,
@@ -50,7 +55,7 @@ describe('Overview executive command center', () => {
       screen.getByText('Enterprise Conversation-to-POC Platform'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Convo2POC captures requirements, resolves ambiguity/),
+      screen.getByText('From conversation to clarity to working prototype.'),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start Demo' })).toBeEnabled();
     expect(
@@ -61,7 +66,7 @@ describe('Overview executive command center', () => {
       'page',
     );
   });
-  it('renders all eight connected journey stages and five differentiators', async () => {
+  it('renders all eight connected journey stages and four story frames', async () => {
     await renderOverview();
     const workflow = screen.getByRole('region', {
       name: 'From a conversation to a solution you can review',
@@ -75,15 +80,78 @@ describe('Overview executive command center', () => {
       ).toBeInTheDocument();
       expect(within(workflow).getByText(stage.phrase)).toBeInTheDocument();
     }
-    for (const item of differentiators)
+    const story = screen.getByRole('region', { name: 'See the idea unfold' });
+    expect(within(story).getAllByRole('listitem')).toHaveLength(4);
+    for (const frame of storyboardFrames)
       expect(
-        screen.getByRole('heading', { name: item.title }),
+        within(story).getByRole('heading', { name: frame.title }),
       ).toBeInTheDocument();
+  });
+  it('renders the complete visual concept and both comparison flows', async () => {
+    await renderOverview();
     expect(
-      screen.getByText(
-        'Reduce the gap between a client explaining a problem and seeing a reviewable working solution.',
-      ),
+      screen.getByRole('img', {
+        name: /Conversation flows through AI intelligence/,
+      }),
     ).toBeInTheDocument();
+    const comparison = screen.getByRole('region', {
+      name: 'Traditional vs Convo2POC',
+    });
+    for (const process of processComparison) {
+      const panel = within(comparison).getByRole('article', {
+        name: process.title,
+      });
+      expect(within(panel).getAllByRole('listitem')).toHaveLength(7);
+      for (const stage of process.stages)
+        expect(within(panel).getByText(stage)).toBeInTheDocument();
+    }
+  });
+  it('supports keyboard theme changes on Overview without changing demo state', async () => {
+    document.documentElement.classList.add('dark');
+    const router = await renderOverview();
+    const user = userEvent.setup();
+    screen.getByRole('button', { name: 'Switch to light mode' }).focus();
+    await user.keyboard('{Enter}');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    expect(
+      screen.getByRole('heading', { name: 'Traditional vs Convo2POC' }),
+    ).toBeInTheDocument();
+    await user.keyboard(' ');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(router.state.location.pathname).toBe('/');
+    expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
+  });
+  it('renders five distinct telemetry variants and a working final CTA', async () => {
+    const router = await renderOverview();
+    const telemetry = screen.getByRole('region', {
+      name: 'Illustrative demo metrics',
+    });
+    for (const metric of overviewMetrics) {
+      const label = within(telemetry).getByText(metric.label);
+      expect(label.closest('[data-variant]')).toHaveAttribute(
+        'data-variant',
+        metric.icon,
+      );
+    }
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Explore the demo' }));
+    expect(router.state.location.pathname).toBe('/session');
+    expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
+  });
+  it('shows a complete static concept with reduced motion and preserves governance', async () => {
+    motionPreference.reduced = true;
+    await renderOverview();
+    const concept = screen.getByRole('img', {
+      name: /Conversation flows through AI intelligence/,
+    });
+    expect(
+      within(concept).queryByText('Ambiguity detected'),
+    ).not.toBeInTheDocument();
+    expect(within(concept).getByText('Clarified')).toBeInTheDocument();
+    expect(within(concept).getByText('Human approved')).toBeInTheDocument();
+    expect(within(concept).getByText('Approved → POC v2')).toBeInTheDocument();
+    expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
   });
   it('Start Demo restores the entire canonical initial state and navigates without playback', async () => {
     useDemoStore.setState({
@@ -152,7 +220,9 @@ describe('Overview executive command center', () => {
     });
     for (const metric of overviewMetrics) {
       expect(within(telemetry).getByText(metric.label)).toBeInTheDocument();
-      expect(within(telemetry).getByText(metric.value)).toBeInTheDocument();
+      expect(
+        within(telemetry).getByText(metric.value, { selector: '.sr-only' }),
+      ).toBeInTheDocument();
       expect(within(telemetry).getByText(metric.detail)).toBeInTheDocument();
     }
     expect(catalogMetrics.requirements).toBe(requirements.length);
@@ -221,5 +291,18 @@ describe('canonical metric derivation', () => {
     expect(empty.requirements).toBe(0);
     expect(empty.traceabilityCoverage).toBe(0);
     expect(empty.testsTotal).toBe(0);
+  });
+});
+
+describe('illustrative hero story order', () => {
+  it('clarifies and approves before generation, validation and the version loop', () => {
+    const { duration, ...steps } = heroStory;
+    const timings = Object.values(steps);
+    expect(timings).toEqual([...timings].sort((a, b) => a - b));
+    expect(heroStory.resolved).toBeLessThan(heroStory.scope);
+    expect(heroStory.scope).toBeLessThan(heroStory.prototype);
+    expect(heroStory.validation).toBeLessThan(heroStory.feedback);
+    expect(heroStory.feedback).toBeLessThan(heroStory.version);
+    expect(heroStory.version).toBeLessThan(duration);
   });
 });

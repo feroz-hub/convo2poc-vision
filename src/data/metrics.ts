@@ -95,6 +95,7 @@ export const overviewMetrics = [
     value: `${demoEstimate.timeToPocMinutes} min`,
     detail: 'Illustrative scenario estimate',
     icon: 'time',
+    progress: 0,
   },
   {
     id: 'requirements',
@@ -102,6 +103,7 @@ export const overviewMetrics = [
     value: String(catalogMetrics.requirements),
     detail: 'Records in the canonical scenario',
     icon: 'requirements',
+    progress: 100,
   },
   {
     id: 'clarifications',
@@ -109,6 +111,11 @@ export const overviewMetrics = [
     value: `${catalogMetrics.resolvedClarifications} / ${catalogMetrics.clarifications}`,
     detail: 'Questions awaiting demo resolution',
     icon: 'clarifications',
+    progress: catalogMetrics.clarifications
+      ? (catalogMetrics.resolvedClarifications /
+          catalogMetrics.clarifications) *
+        100
+      : 0,
   },
   {
     id: 'traceability',
@@ -116,6 +123,7 @@ export const overviewMetrics = [
     value: `${catalogMetrics.traceabilityCoverage}%`,
     detail: `${catalogMetrics.mappedRequirements} of ${catalogMetrics.traceableRequirements} functional requirements · seed graph`,
     icon: 'traceability',
+    progress: catalogMetrics.traceabilityCoverage,
   },
   {
     id: 'tests',
@@ -123,5 +131,8 @@ export const overviewMetrics = [
     value: `${catalogMetrics.testsPassed} / ${catalogMetrics.testsTotal}`,
     detail: 'Planned POC checks · not yet run',
     icon: 'tests',
+    progress: catalogMetrics.testsTotal
+      ? (catalogMetrics.testsPassed / catalogMetrics.testsTotal) * 100
+      : 0,
   },
 ] as const;

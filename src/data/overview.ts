@@ -14,14 +14,14 @@ import {
 export const workflowStages = [
   {
     id: 'conversation',
-    title: 'Conversation',
+    title: 'Listen',
     phrase: 'Capture the business need',
     icon: AudioLines,
     group: 'Understand',
   },
   {
     id: 'requirements',
-    title: 'Requirements',
+    title: 'Understand',
     phrase: 'Structure the signals',
     icon: ListChecks,
     group: 'Understand',
@@ -131,3 +131,46 @@ export const processComparison = [
     ],
   },
 ] as const;
+
+export const storyboardFrames = [
+  {
+    title: 'Client explains',
+    caption: 'Email + spreadsheets',
+    icon: AudioLines,
+    kind: 'conversation',
+  },
+  {
+    title: 'AI structures',
+    caption: 'Source-linked requirements',
+    icon: ListChecks,
+    kind: 'requirements',
+  },
+  {
+    title: 'Ambiguity clarified',
+    caption: 'P1 → manager approval',
+    icon: MessageCircleQuestion,
+    kind: 'clarification',
+  },
+  {
+    title: 'POC generated',
+    caption: 'After human approval',
+    icon: Monitor,
+    kind: 'prototype',
+  },
+] as const;
+
+// Presentation-only cycle: no demo events, transcript playback, or domain state changes.
+export const heroStory = {
+  duration: 30,
+  speech: 0,
+  signal: 2,
+  intelligence: 4,
+  requirements: 6,
+  ambiguity: 9,
+  resolved: 12,
+  scope: 15,
+  prototype: 18,
+  validation: 21,
+  feedback: 24,
+  version: 27,
+} as const;
