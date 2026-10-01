@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PanelLeft, LockKeyhole, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { scenario } from '@/data/scenario';
@@ -12,10 +13,17 @@ export function TopBar({
   onOpen: () => void;
   navigationOpen: boolean;
 }) {
+  const overview = useLocation().pathname === '/';
+  const navigate = useNavigate();
+  const reset = useDemoStore((state) => state.reset);
+  const start = () => {
+    reset();
+    navigate('/session');
+  };
   const version = useDemoStore((state) => state.currentPocVersion);
   const { theme, toggleTheme } = useTheme();
   return (
-    <header className="topbar">
+    <header className={`topbar ${overview ? 'topbar-overview' : ''}`}>
       <div className="brand-row">
         <span className="hcl-brand-area" aria-label="HCLTech brand area">
           HCLTech
@@ -61,11 +69,14 @@ export function TopBar({
           <span className="session-status">○ Demo session idle</span>
           <LockKeyhole size={15} aria-label="Sandbox environment" />
         </div>
+        {overview && <DemoControls presentation onStart={start} />}
       </div>
-      <div className="controls-row">
-        <span className="playback-note">Playback available in Phase 3</span>
-        <DemoControls />
-      </div>
+      {!overview && (
+        <div className="controls-row">
+          <span className="playback-note">Playback available in Phase 3</span>
+          <DemoControls />
+        </div>
+      )}
     </header>
   );
 }

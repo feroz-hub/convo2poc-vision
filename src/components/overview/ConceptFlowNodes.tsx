@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Check,
   GitBranch,
+  GitPullRequestArrow,
 } from 'lucide-react';
 import { heroStory } from '@/data/overview';
 import { requirements } from '@/data/requirements';
@@ -78,7 +79,7 @@ function ConceptNode({
       <motion.div
         className="concept-node-face"
         initial={false}
-        animate={reduced ? { opacity: 1 } : { opacity: [0.3, 0.3, 1, 1, 0.3] }}
+        animate={reduced ? { scale: 1 } : { scale: [1, 1, 1.06, 1, 1] }}
         transition={
           reduced
             ? { duration: 0 }
@@ -98,7 +99,12 @@ function ConceptNode({
 }
 export function ConversationNode() {
   return (
-    <ConceptNode label="Client speaks" x={14} y={20} at={heroStory.speech}>
+    <ConceptNode
+      label="Client conversation"
+      x={14}
+      y={16}
+      at={heroStory.speech}
+    >
       <AudioLines size={24} />
       <StoryReveal at={0} until={6} className="speech-bars">
         {[1, 2, 3, 4, 5].map((i) => (
@@ -113,7 +119,7 @@ export function AIHubNode() {
     <ConceptNode
       label="AI intelligence"
       x={50}
-      y={20}
+      y={16}
       at={heroStory.intelligence}
     >
       <BrainCircuit size={27} />
@@ -126,19 +132,22 @@ export function AIHubNode() {
 export function RequirementCluster() {
   const records = requirements
     .filter((r) => r.type === 'functional')
-    .slice(0, 3);
+    .slice(0, 2);
   return (
     <ConceptNode
       label="Requirements"
       x={86}
-      y={20}
+      y={16}
       at={heroStory.requirements}
       detail={
-        <StoryReveal at={6} className="requirement-cluster">
+        <div className="requirement-cluster">
           {records.map((r) => (
-            <code key={r.id}>{r.id}</code>
+            <div key={r.id}>
+              <code>{r.id}</code>
+              <span>{r.title}</span>
+            </div>
           ))}
-        </StoryReveal>
+        </div>
       }
     >
       <ListChecks size={24} />
@@ -242,19 +251,28 @@ export function FeedbackLoop() {
       >
         <GitBranch size={24} />
       </ConceptNode>
-      <motion.svg
+      <ConceptNode
+        tone="proof"
+        label="POC v2"
+        x={86}
+        y={84}
+        at={heroStory.version}
+        detail={<div className="concept-status">Human approval</div>}
+      >
+        <GitPullRequestArrow size={24} />
+      </ConceptNode>
+      <svg
         className="concept-connections feedback-path"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
       >
+        <path d="M50 84 H86 H96 V16 H92" className="concept-loop-track" />
         <motion.path
-          d="M60 84 H96 V20 H92"
+          d="M50 84 H86 H96 V16 H92"
           className="concept-loop"
           initial={false}
           animate={
-            reduced
-              ? { pathLength: 1, opacity: 1 }
-              : { pathLength: [0, 0, 1, 1, 0], opacity: [0, 0, 1, 1, 0] }
+            reduced ? { pathLength: 1 } : { pathLength: [0, 0, 0.18, 1, 1, 0] }
           }
           transition={
             reduced
@@ -262,11 +280,11 @@ export function FeedbackLoop() {
               : {
                   duration: 30,
                   repeat: Infinity,
-                  times: [0, 0.8, 0.9, 0.98, 1],
+                  times: [0, 0.8, 0.9, 0.95, 0.98, 1],
                 }
           }
         />
-      </motion.svg>
+      </svg>
       <span className="concept-loop-label">Review → approve → v2</span>
     </>
   );

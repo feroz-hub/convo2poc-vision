@@ -1,6 +1,8 @@
+import { useId } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { heroStory } from '@/data/overview';
 export function SignalPath() {
+  const marker = useId();
   const reduced = useReducedMotion();
   return (
     <svg
@@ -8,10 +10,40 @@ export function SignalPath() {
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
     >
-      <path className="concept-track" d="M14 20 H50 H86 V52 H50 H14 V84 H50" />
+      <defs>
+        <marker
+          id={marker}
+          viewBox="0 0 10 10"
+          refX="8"
+          refY="5"
+          markerWidth="5"
+          markerHeight="5"
+          orient="auto"
+        >
+          <path d="M0 0L10 5L0 10Z" fill="var(--diagram-connector)" />
+        </marker>
+      </defs>
+      {[
+        'M26 16H40',
+        'M62 16H76',
+        'M86 33V40',
+        'M74 52H60',
+        'M38 52H24',
+        'M14 65V72',
+        'M26 84H40',
+        'M62 84H76',
+      ].map((d) => (
+        <path
+          key={d}
+          d={d}
+          className="concept-direction"
+          markerEnd={`url(#${marker})`}
+        />
+      ))}
+      <path className="concept-track" d="M14 16 H50 H86 V52 H50 H14 V84 H50" />
       <motion.path
         className="story-signal"
-        d="M14 20 H50 H86 V52 H50 H14 V84 H50"
+        d="M14 16 H50 H86 V52 H50 H14 V84 H50"
         initial={false}
         animate={
           reduced

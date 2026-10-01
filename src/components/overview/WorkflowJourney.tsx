@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { ArrowRight, LockKeyhole } from 'lucide-react';
 import { workflowStages } from '@/data/overview';
 export function WorkflowJourney() {
@@ -44,7 +45,10 @@ export function WorkflowStageNode({
 }) {
   const Icon = stage.icon;
   return (
-    <li className={`workflow-step workflow-${stage.group.toLowerCase()}`}>
+    <li
+      className={`workflow-step workflow-${stage.group.toLowerCase()}`}
+      style={{ '--rail-delay': `${index * 1.5}s` } as CSSProperties}
+    >
       <span className="workflow-index">
         {String(index + 1).padStart(2, '0')}
       </span>

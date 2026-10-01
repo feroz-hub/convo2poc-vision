@@ -47,6 +47,8 @@
   --cyan-soft: #e9f6fa;
   --violet: #6854bd;
   --violet-soft: #f1eefb;
+  --diagram-connector: #637fa8;
+  --diagram-border: #7e97b8;
   --hero-start: #ffffff;
   --hero-end: #f0f5ff;
   --hero-glow: #4a6be314;
@@ -82,6 +84,8 @@
   --cyan-soft: #183a50;
   --violet: #b7ace4;
   --violet-soft: #292e48;
+  --diagram-connector: var(--border-strong);
+  --diagram-border: var(--border-strong);
   --hero-start: #172b48;
   --hero-end: #122238;
   --hero-glow: #517eeb19;
@@ -2371,4 +2375,207 @@ h1 {
   .overview-page .comparison-panel li {
     font-size: 11px;
   }
+}
+
+/* Overview presentation shell: leave the future playback controls available on other routes. */
+.topbar-overview {
+  padding-block: 14px 12px;
+}
+.topbar-overview .brand-row {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.topbar-overview .engagement-row {
+  gap: 12px;
+}
+.topbar-overview .engagement-name strong {
+  font-size: 12px;
+}
+.topbar-overview .engagement-name span {
+  display: inline;
+  margin-left: 8px;
+  font-size: 10px;
+}
+.topbar-overview .engagement-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.topbar-overview .session-meta {
+  gap: 8px;
+}
+.topbar-overview .session-status {
+  display: none;
+}
+.topbar-overview .demo-controls {
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+.overview-page .overview-hero {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+.concept-visual {
+  height: 460px;
+}
+.concept-node > .concept-node-face {
+  height: 66px;
+  width: 66px;
+  border-color: var(--diagram-border);
+}
+.concept-node-face > svg {
+  width: 29px;
+  height: 29px;
+}
+.concept-node:has(.hub-halo) > .concept-node-face {
+  width: 72px;
+  height: 72px;
+}
+.concept-track,
+.concept-loop-track,
+.concept-direction {
+  fill: none;
+  stroke: var(--diagram-connector);
+  stroke-width: 0.45;
+}
+.concept-direction {
+  stroke-width: 0.5;
+}
+.concept-loop-track {
+  stroke-dasharray: 1 1;
+}
+.concept-loop-label {
+  top: 97%;
+  left: 48%;
+  max-width: 180px;
+}
+.concept-node .requirement-cluster {
+  width: 136px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+.requirement-cluster > div {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 3px 5px;
+  border: 1px solid var(--diagram-border);
+  border-radius: 3px;
+  background: var(--surface);
+}
+.requirement-cluster code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 8px;
+  color: var(--accent-ink);
+}
+.requirement-cluster span {
+  padding: 0;
+  background: transparent;
+  font-size: 8px;
+  line-height: 1.3;
+  color: var(--foreground);
+  text-align: left;
+}
+.workflow-step .workflow-node {
+  animation: workflow-sequence 12s ease-in-out infinite;
+  animation-delay: var(--rail-delay);
+}
+.workflow-step .workflow-arrow {
+  animation: workflow-connector 12s ease-in-out infinite;
+  animation-delay: calc(var(--rail-delay) + 0.6s);
+}
+@keyframes workflow-sequence {
+  0%,
+  12%,
+  100% {
+    box-shadow: none;
+  }
+  5% {
+    box-shadow: 0 0 0 4px var(--hero-glow);
+    border-color: var(--primary);
+  }
+}
+@keyframes workflow-connector {
+  0%,
+  12%,
+  100% {
+    opacity: 0.65;
+  }
+  5% {
+    opacity: 1;
+    color: var(--primary);
+  }
+}
+@media (max-width: 1250px) {
+  .overview-page .overview-hero {
+    grid-template-columns: 1fr;
+  }
+  .topbar-overview .engagement-row {
+    flex-wrap: wrap;
+  }
+  .topbar-overview .engagement-name {
+    flex: 1;
+  }
+}
+@media (max-width: 600px) {
+  .topbar-overview {
+    padding: 12px 16px;
+  }
+  .topbar-overview .brand-row {
+    gap: 8px;
+  }
+  .topbar-overview .engagement-name {
+    display: block;
+  }
+  .topbar-overview .engagement-name span {
+    display: block;
+    margin: 3px 0 0;
+  }
+  .topbar-overview .demo-controls {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  .concept-visual {
+    height: 400px;
+  }
+  .concept-node > .concept-node-face {
+    height: 48px;
+    width: 48px;
+  }
+  .concept-node:has(.hub-halo) > .concept-node-face {
+    height: 54px;
+    width: 54px;
+  }
+  .concept-node-face > svg {
+    width: 25px;
+    height: 25px;
+  }
+  .concept-node .requirement-cluster {
+    width: 92px;
+  }
+  .requirement-cluster > div {
+    gap: 3px;
+    padding: 2px;
+  }
+  .requirement-cluster span,
+  .requirement-cluster code {
+    font-size: 6px;
+  }
+  .concept-loop-label {
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workflow-step .workflow-node,
+  .workflow-step .workflow-arrow {
+    animation: none;
+  }
+}
+
+.requirement-cluster code {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

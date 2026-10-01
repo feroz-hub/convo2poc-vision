@@ -153,6 +153,46 @@ describe('Overview executive command center', () => {
     expect(within(concept).getByText('Approved → POC v2')).toBeInTheDocument();
     expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
   });
+  it('uses a compact presentation header without removing future playback controls', async () => {
+    const router = await renderOverview();
+    expect(
+      screen.queryByText('Playback available in Phase 3'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Pause / Resume' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Next stage' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Restart' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Internal Concept Prototype')).toBeInTheDocument();
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Run Demo' }));
+    expect(router.state.location.pathname).toBe('/session');
+    expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
+    expect(
+      screen.getByRole('button', { name: 'Pause / Resume' }),
+    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next stage' })).toBeDisabled();
+  });
+  it('keeps source-backed requirement artifacts and the v2 destination visible without animation', async () => {
+    motionPreference.reduced = true;
+    await renderOverview();
+    const visual = screen.getByRole('img', {
+      name: /Conversation flows through AI intelligence/,
+    });
+    for (const item of requirements
+      .filter((r) => r.type === 'functional')
+      .slice(0, 2)) {
+      expect(within(visual).getByText(item.id)).toBeInTheDocument();
+      expect(within(visual).getByText(item.title)).toBeInTheDocument();
+    }
+    expect(within(visual).getByText('POC v2')).toBeInTheDocument();
+    expect(within(visual).getByText('Human approval')).toBeInTheDocument();
+  });
   it('Start Demo restores the entire canonical initial state and navigates without playback', async () => {
     useDemoStore.setState({
       isRunning: true,
