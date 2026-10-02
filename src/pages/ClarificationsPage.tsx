@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { ShieldCheck, RotateCcw, ArrowRight } from 'lucide-react';
 import { clarifications } from '@/data/requirements';
@@ -78,6 +78,12 @@ export function ClarificationsPage() {
           </span>
         ))}
       </div>
+      {summary.resolved === clarifications.length && (
+        <div className="clarification-scope-continuation">
+          <span>All canonical clarifications are consultant-confirmed.</span>
+          <Link to="/scope">Continue to POC Scope →</Link>
+        </div>
+      )}
       <div className="clarification-layout">
         <ClarificationQueue
           onSelect={(id) => {

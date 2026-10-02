@@ -1,5 +1,8 @@
 import { create } from 'zustand';
-import { clarifications } from '@/data/requirements';
+import { scopeItems, successCriteria } from '@/data/scope';
+import { canApproveScope } from './scopeSelectors';
+import { selectGovernedRequirementIds } from './clarificationSelectors';
+import { requirements, clarifications } from '@/data/requirements';
 import { calculateLiveReadiness } from '@/simulation/readiness';
 import { agents, buildChecks } from '@/data/agents';
 import type {
@@ -10,11 +13,19 @@ import type {
   PocVersion,
   ClarificationFilter,
   ClarificationHistoryEntry,
+  ScopeDecision,
+  ScopeOverride,
+  ScopeReviewKey,
+  PocBaseline,
 } from '@/types/domain';
 import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  selectedScopeItemId: string;
+  scopeOverrides: Record<string, ScopeOverride>;
+  scopeReviews: Record<ScopeReviewKey, boolean>;
+  pocBaseline: PocBaseline | null;
   selectedClarificationId: string;
   clarificationFilter: ClarificationFilter;
   editedClarificationQuestions: Record<string, string>;
@@ -50,6 +61,15 @@ export interface DemoState {
   demoSpeed: number;
 }
 export const createInitialDemoState = (): DemoState => ({
+  selectedScopeItemId: 'scope-FR-007',
+  scopeOverrides: {},
+  scopeReviews: {
+    requirements: false,
+    assumptions: false,
+    scope: false,
+    successCriteria: false,
+  },
+  pocBaseline: null,
   selectedClarificationId: 'OQ-001',
   clarificationFilter: 'all',
   editedClarificationQuestions: {},
@@ -85,6 +105,15 @@ export const createInitialDemoState = (): DemoState => ({
   demoSpeed: 1,
 });
 interface DemoActions {
+  selectScopeItem: (id: string) => void;
+  setScopeDecision: (
+    id: string,
+    decision: ScopeDecision,
+    reason?: string,
+  ) => void;
+  resetScopeRecommendation: (id: string) => void;
+  setScopeReview: (key: ScopeReviewKey, reviewed: boolean) => void;
+  approveScope: () => void;
   selectClarification: (id: string) => void;
   setClarificationFilter: (filter: ClarificationFilter) => void;
   editClarificationQuestion: (id: string, question: string) => void;
@@ -123,6 +152,88 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  selectScopeItem: (id) => {
+    if (scopeItems.some((item) => item.id === id))
+      set({ selectedScopeItemId: id });
+  },
+  setScopeDecision: (id, decision, reason = '') => {
+    const state = get();
+    const item = scopeItems.find((item) => item.id === id);
+    if (
+      !item ||
+      state.scopeApproved ||
+      !['included', 'mocked', 'excluded'].includes(decision)
+    )
+      return;
+    const scopeOverrides = { ...state.scopeOverrides };
+    if (decision === item.decision) delete scopeOverrides[id];
+    else scopeOverrides[id] = { decision, reason: reason.trim() };
+    set({
+      scopeOverrides,
+      scopeReviews: {
+        ...state.scopeReviews,
+        scope: false,
+        successCriteria: false,
+      },
+    });
+  },
+  resetScopeRecommendation: (id) => {
+    const item = scopeItems.find((item) => item.id === id);
+    if (item && !get().scopeApproved) get().setScopeDecision(id, item.decision);
+  },
+  setScopeReview: (key, reviewed) => {
+    if (!get().scopeApproved)
+      set({ scopeReviews: { ...get().scopeReviews, [key]: reviewed } });
+  },
+  approveScope: () => {
+    const state = get();
+    if (!canApproveScope(state)) return;
+    const ids = (decision: ScopeDecision) =>
+      Object.freeze(
+        scopeItems
+          .filter(
+            (item) =>
+              (state.scopeOverrides[item.id]?.decision ?? item.decision) ===
+              decision,
+          )
+          .map((item) => item.id),
+      );
+    const seconds = Math.floor(state.elapsedMs / 1000);
+    const decisions = Object.fromEntries(
+      scopeItems.map((item) => [
+        item.id,
+        Object.freeze({
+          ...(state.scopeOverrides[item.id] ?? {
+            decision: item.decision,
+            reason: item.reason,
+          }),
+        }),
+      ]),
+    );
+    const pocBaseline: PocBaseline = Object.freeze({
+      id: 'RB-001',
+      version: 'v1',
+      requirementIds: Object.freeze(requirements.map((r) => r.id)),
+      confirmedRequirementIds: Object.freeze(
+        selectGovernedRequirementIds(state),
+      ),
+      includedScopeItemIds: ids('included'),
+      mockedScopeItemIds: ids('mocked'),
+      excludedScopeItemIds: ids('excluded'),
+      successCriteriaIds: Object.freeze(successCriteria.map((c) => c.id)),
+      resolvedClarificationIds: Object.freeze([
+        ...state.resolvedClarificationIds,
+      ]),
+      acknowledgedAssumptionIds: Object.freeze(
+        requirements.filter((r) => r.type === 'assumption').map((r) => r.id),
+      ),
+      decisions: Object.freeze(decisions),
+      approvedAt: `Demo ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`,
+      approvedBy: 'Consultant',
+      clarificationReviewSequence: state.clarificationHistory.length,
+    });
+    set({ scopeApproved: true, baselineVersion: 'RB-001', pocBaseline });
+  },
   selectClarification: (id) => {
     if (validClarification(id)) set({ selectedClarificationId: id });
   },

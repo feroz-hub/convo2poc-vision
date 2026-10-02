@@ -43,7 +43,18 @@ export const routeObjects: RouteObject[] = [
                       .ClarificationsPage,
                   }),
                 }
-              : { element: <StagePlaceholder route={route} /> }),
+              : route.path === '/scope'
+                ? {
+                    hydrateFallbackElement: (
+                      <section className="page-content" role="status">
+                        Preparing the POC Scope Studio…
+                      </section>
+                    ),
+                    lazy: async () => ({
+                      Component: (await import('@/pages/ScopePage')).ScopePage,
+                    }),
+                  }
+                : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

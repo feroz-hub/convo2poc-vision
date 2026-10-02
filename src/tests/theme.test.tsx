@@ -55,9 +55,10 @@ describe('internal presentation themes', () => {
       screen.getByRole('button', { name: 'Switch to light mode' }),
     );
     await user.click(screen.getByRole('link', { name: 'POC Scope' }));
+    await screen.findByRole('heading', { name: 'POC Scope Studio' });
     await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
     expect(
-      screen.getByRole('heading', { name: 'POC Scope' }),
+      screen.getByRole('heading', { name: 'POC Scope Studio' }),
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
   });

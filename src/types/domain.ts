@@ -73,13 +73,44 @@ export interface Clarification {
   resolution: string;
   resolutionMessageId: string;
 }
+export type ScopeDecision = 'included' | 'mocked' | 'excluded';
+export type ScopeReviewKey =
+  'requirements' | 'assumptions' | 'scope' | 'successCriteria';
+export interface ScopeOverride {
+  decision: ScopeDecision;
+  reason: string;
+}
+export interface PocSuccessCriterion {
+  id: string;
+  requirementIds: string[];
+  scopeItemIds: string[];
+}
+export interface PocBaseline {
+  readonly id: 'RB-001';
+  readonly version: 'v1';
+  readonly requirementIds: readonly string[];
+  readonly confirmedRequirementIds: readonly string[];
+  readonly includedScopeItemIds: readonly string[];
+  readonly mockedScopeItemIds: readonly string[];
+  readonly excludedScopeItemIds: readonly string[];
+  readonly successCriteriaIds: readonly string[];
+  readonly resolvedClarificationIds: readonly string[];
+  readonly acknowledgedAssumptionIds: readonly string[];
+  readonly decisions: Readonly<Record<string, Readonly<ScopeOverride>>>;
+  readonly approvedAt: string;
+  readonly approvedBy: 'Consultant';
+  readonly clarificationReviewSequence: number;
+}
 export interface ScopeItem {
   id: string;
   title: string;
   requirementIds: string[];
-  decision: 'included' | 'mocked' | 'excluded';
+  decision: ScopeDecision;
   reason: string;
-  complexity: 'low' | 'medium';
+  complexity: 'low' | 'medium' | 'high';
+  externalDependency: 'none' | 'low' | 'medium' | 'high';
+  evidenceMessageIds: string[];
+  clarificationIds: string[];
   relevance: 'core' | 'supporting' | 'future';
 }
 export interface AgentStatus {

@@ -21,7 +21,8 @@ describe('application shell and route placeholders', () => {
       (route) =>
         route.path !== '/' &&
         route.path !== '/session' &&
-        route.path !== '/clarifications',
+        route.path !== '/clarifications' &&
+        route.path !== '/scope',
     ),
   )('renders $path and marks its navigation active', (route) => {
     renderRoute(route.path);
@@ -45,7 +46,10 @@ describe('application shell and route placeholders', () => {
     });
     await user.click(screen.getByRole('link', { name: 'POC Scope' }));
     expect(
-      screen.getByRole('heading', { level: 1, name: 'POC Scope' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'POC Scope Studio',
+      }),
     ).toBeInTheDocument();
     expect(useDemoStore.getState().scopeApproved).toBe(false);
   });

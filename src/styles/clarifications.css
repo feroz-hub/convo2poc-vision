@@ -754,3 +754,21 @@
     grid-column: 1 / -1;
   }
 }
+
+.clarification-scope-continuation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  border-radius: 9px;
+  margin-bottom: 18px;
+  font-size: 12px;
+}
+.clarification-scope-continuation a {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
