@@ -66,7 +66,19 @@ export const routeObjects: RouteObject[] = [
                           .RequirementsPage,
                       }),
                     }
-                  : { element: <StagePlaceholder route={route} /> }),
+                  : route.path === '/generation'
+                    ? {
+                        hydrateFallbackElement: (
+                          <section className="page-content" role="status">
+                            Preparing AI Generation Command Center…
+                          </section>
+                        ),
+                        lazy: async () => ({
+                          Component: (await import('@/pages/GenerationPage'))
+                            .GenerationPage,
+                        }),
+                      }
+                    : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

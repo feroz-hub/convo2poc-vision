@@ -82,6 +82,11 @@ export function ScopeApprovalGate() {
             Future client changes create a new baseline rather than silently
             modifying this approved scope.
           </p>
+          {generation === 'Ready' && (
+            <Link className="scope-generation-link" to="/generation">
+              Start POC Generation ↗
+            </Link>
+          )}
           {generation === 'Review required' && (
             <p className="scope-blocker">
               <TriangleAlert size={15} aria-hidden="true" />

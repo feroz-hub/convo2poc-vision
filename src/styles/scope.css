@@ -1129,3 +1129,14 @@
     scroll-behavior: auto !important;
   }
 }
+
+.scope-generation-link {
+  display: inline-flex;
+  padding: 11px 16px;
+  border-radius: 7px;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  font-size: 0.78rem;
+  text-decoration: none;
+  margin-top: 12px;
+}

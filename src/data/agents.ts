@@ -9,7 +9,7 @@ export const agents: AgentStatus[] = [
   },
   {
     id: 'architecture',
-    name: 'Scope / Architecture Agent',
+    name: 'Architecture Agent',
     description: 'Plans the POC architecture.',
     status: 'waiting',
     progress: 0,
@@ -44,43 +44,26 @@ export const agents: AgentStatus[] = [
   },
   {
     id: 'security',
-    name: 'Security Check',
+    name: 'Security Validation',
     description: 'Reviews the sandbox baseline.',
     status: 'waiting',
     progress: 0,
   },
   {
     id: 'deployment',
-    name: 'Deployment Agent',
-    description: 'Simulates sandbox availability.',
+    name: 'Sandbox Preparation',
+    description: 'Packages the simulated POC for isolated human review.',
     status: 'waiting',
     progress: 0,
   },
 ];
 export const buildChecks: BuildCheck[] = [
-  {
-    id: 'build',
-    label: 'Production build',
-    status: 'waiting',
-  },
-  {
-    id: 'ui',
-    label: 'UI validation',
-    status: 'waiting',
-  },
-  {
-    id: 'api',
-    label: 'API contract validation',
-    status: 'waiting',
-  },
-  {
-    id: 'tests',
-    label: 'Requirement tests',
-    status: 'waiting',
-  },
-  {
-    id: 'security',
-    label: 'Security baseline',
-    status: 'waiting',
-  },
-];
+  ['frontend', 'Frontend Build'],
+  ['backend', 'Backend Build'],
+  ['schema', 'Schema Validation'],
+  ['api', 'API Smoke Tests'],
+  ['ui', 'UI Smoke Tests'],
+  ['workflow', 'Workflow Tests'],
+  ['security', 'Security Baseline'],
+  ['sandbox', 'Sandbox Health'],
+].map(([id, label]) => ({ id: id!, label: label!, status: 'waiting' }));

@@ -4,7 +4,12 @@ import { canApproveScope } from './scopeSelectors';
 import { selectGovernedRequirementIds } from './clarificationSelectors';
 import { requirements, clarifications } from '@/data/requirements';
 import { calculateLiveReadiness } from '@/simulation/readiness';
-import { agents, buildChecks } from '@/data/agents';
+import {
+  advanceGeneration,
+  createEngineeringState,
+} from '@/simulation/generationEngine';
+import { generationEvents } from '@/simulation/generationEvents';
+import { selectGenerationReadiness } from './scopeSelectors';
 import type {
   Actor,
   TranscriptMessage,
@@ -18,11 +23,13 @@ import type {
   ScopeReviewKey,
   PocBaseline,
   RequirementView,
+  GenerationRuntime,
 } from '@/types/domain';
 import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  generation: GenerationRuntime;
   requirementView: RequirementView;
   selectedScopeItemId: string;
   scopeOverrides: Record<string, ScopeOverride>;
@@ -107,13 +114,19 @@ export const createInitialDemoState = (): DemoState => ({
   resolvedClarificationIds: [],
   scopeApproved: false,
   baselineVersion: null,
-  agentStatuses: agents.map((agent) => ({ ...agent })),
-  buildChecks: buildChecks.map((check) => ({ ...check })),
+  ...createEngineeringState(),
   currentPocVersion: 'v1',
   approvedChangeIds: [],
   demoSpeed: 1,
 });
 interface DemoActions {
+  startGeneration: () => void;
+  pauseGeneration: () => void;
+  resumeGeneration: () => void;
+  nextGenerationEvent: () => void;
+  restartGeneration: () => void;
+  selectGenerationAgent: (id: string) => void;
+  selectGenerationArtifact: (id: string | null) => void;
   setRequirementView: (view: Partial<RequirementView>) => void;
   selectScopeItem: (id: string) => void;
   setScopeDecision: (
@@ -162,6 +175,101 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  startGeneration: () => {
+    const state = get();
+    if (
+      selectGenerationReadiness(state) !== 'Ready' ||
+      state.generation.status !== 'idle'
+    )
+      return;
+    set(
+      advanceGeneration(
+        { ...state, generation: { ...state.generation, status: 'running' } },
+        0,
+      ),
+    );
+  },
+  pauseGeneration: () => {
+    const state = get();
+    if (state.generation.status === 'running')
+      set({
+        generation: { ...state.generation, status: 'paused' },
+        agentStatuses: state.agentStatuses.map((a) =>
+          a.status === 'running' ? { ...a, status: 'paused' } : a,
+        ),
+      });
+  },
+  resumeGeneration: () => {
+    const state = get();
+    if (
+      selectGenerationReadiness(state) === 'Ready' &&
+      state.generation.status === 'paused'
+    )
+      set({
+        generation: { ...state.generation, status: 'running' },
+        agentStatuses: state.agentStatuses.map((a) =>
+          a.status === 'paused' ? { ...a, status: 'running' } : a,
+        ),
+      });
+  },
+  nextGenerationEvent: () => {
+    const state = get();
+    const event = generationEvents[state.generation.eventCursor];
+    if (
+      selectGenerationReadiness(state) === 'Ready' &&
+      event &&
+      state.generation.status !== 'failed'
+    )
+      set(
+        advanceGeneration(
+          {
+            ...state,
+            generation: {
+              ...state.generation,
+              status:
+                state.generation.status === 'running' ? 'running' : 'paused',
+            },
+            agentStatuses: state.agentStatuses.map((a) =>
+              a.status === 'paused' ? { ...a, status: 'running' } : a,
+            ),
+          },
+          event.at,
+        ),
+      );
+  },
+  restartGeneration: () => {
+    const state = get();
+    if (selectGenerationReadiness(state) === 'Ready')
+      set(
+        advanceGeneration(
+          {
+            ...state,
+            ...createEngineeringState(),
+            generation: {
+              ...createEngineeringState().generation,
+              status: 'running',
+            },
+          },
+          0,
+        ),
+      );
+  },
+  selectGenerationAgent: (id) => {
+    const state = get();
+    if (state.agentStatuses.some((a) => a.id === id))
+      set({
+        generation: {
+          ...state.generation,
+          selectedAgentId: id,
+          selectedArtifactId: null,
+        },
+      });
+  },
+  selectGenerationArtifact: (id) => {
+    const state = get();
+    if (id === null || state.generation.artifactStatuses[id])
+      set({ generation: { ...state.generation, selectedArtifactId: id } });
+  },
   setRequirementView: (view) => {
     if (view.selectedId && !requirements.some((r) => r.id === view.selectedId))
       return;
@@ -364,7 +472,15 @@ export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   },
   tick: (deltaMs) => {
     const state = get();
-    if (state.isRunning && Number.isFinite(deltaMs) && deltaMs > 0)
+    if (!Number.isFinite(deltaMs) || deltaMs <= 0) return;
+    if (state.generation.status === 'running')
+      set(
+        advanceGeneration(
+          state,
+          state.generation.elapsedMs + deltaMs * state.demoSpeed,
+        ),
+      );
+    if (state.isRunning)
       set(advanceSession(state, state.elapsedMs + deltaMs * state.demoSpeed));
   },
   reset: () => set(createInitialDemoState()),

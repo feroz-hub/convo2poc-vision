@@ -23,7 +23,8 @@ describe('application shell and route placeholders', () => {
         route.path !== '/session' &&
         route.path !== '/clarifications' &&
         route.path !== '/scope' &&
-        route.path !== '/requirements',
+        route.path !== '/requirements' &&
+        route.path !== '/generation',
     ),
   )('renders $path and marks its navigation active', (route) => {
     renderRoute(route.path);
@@ -64,7 +65,7 @@ describe('application shell and route placeholders', () => {
       currentPocVersion: 'v2',
       detectedRequirementIds: ['FR-001'],
     });
-    renderRoute('/generation');
+    renderRoute('/preview');
     expect(screen.getByRole('button', { name: 'Run Demo' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
     expect(screen.getByText('POC v1')).toBeInTheDocument();
@@ -72,7 +73,7 @@ describe('application shell and route placeholders', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'Generation',
+        name: 'POC Preview',
       }),
     ).toBeInTheDocument();
   });

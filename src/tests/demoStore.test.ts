@@ -30,7 +30,7 @@ describe('demo store foundation', () => {
       currentPocVersion: 'v2',
       approvedChangeIds: ['CR-001'],
       demoSpeed: 4,
-      agentStatuses: [{ ...agents[0]!, status: 'complete', progress: 100 }],
+      agentStatuses: [{ ...agents[0]!, status: 'completed', progress: 100 }],
       buildChecks: [{ ...buildChecks[0]!, status: 'passed' }],
     });
     useDemoStore.getState().reset();

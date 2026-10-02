@@ -4,7 +4,7 @@
 
 Convo2POC is an enterprise-governed Conversation-to-POC concept for presales and consulting teams. This interactive vision prototype will demonstrate structured requirements, clarification, scope approval, controlled generation, validation, traceability, and a reviewed client feedback loop.
 
-The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–5 and Phase 5.5 Requirement Intelligence are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. `/requirements` is the structured requirement model and evidence inspector. The five later-phase product routes remain labeled placeholders. Phase 6 requires explicit approval.
+The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–6, including Phase 5.5 Requirement Intelligence, are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. `/requirements` is the structured requirement model and evidence inspector. `/generation` is the governed AI Generation Command Center. The four later-phase product routes remain labeled placeholders. Phase 7 requires explicit approval.
 
 ## Getting started
 
@@ -47,7 +47,7 @@ The shadcn Button is local source in `src/components/ui`; `components.json` and 
 - `src/app/`: shared route metadata, router, and providers.
 - `src/components/shell/`: responsive navigation, engagement top bar, and demo controls.
 - `src/components/common/` and `src/components/ui/`: reusable presentation primitives.
-- `src/pages/`: approved Overview, Live Session, Clarification Center, Scope Studio, Requirement Intelligence and explicitly labeled phase placeholders.
+- `src/pages/`: approved Overview, Live Session, Clarification Center, Scope Studio, Requirement Intelligence, Generation Command Center and explicitly labeled phase placeholders.
 - `src/components/clarifications/`: queue, five-stage evidence workspace, consultant approval actions and impact/history panel.
 - `src/components/requirements/`: structured model visual, shared readiness breakdown, filtered catalog, evidence and relationship inspector.
 - `src/store/requirementSelectors.ts`: status, capture, canonical relationship, filtering and model quality selectors.
@@ -56,7 +56,7 @@ The shadcn Button is local source in `src/components/ui`; `components.json` and 
 - `src/types/domain.ts`: requirements, transcript, scope, agents, validation, artifact graph, feedback, and version types.
 - `src/data/`: canonical local scenario catalogs. Product records stay out of JSX.
 - `src/store/demoStore.ts`: one in-memory Zustand store and a fresh-state factory.
-- `src/simulation/`: typed event contracts, Phase 3 schedule, pure reducer, global clock and shared illustrative readiness model.
+- `src/simulation/`: typed event contracts, Phase 3 and Phase 6 schedules, pure reducers, global clock and shared illustrative readiness model.
 - `src/styles/`: theme and responsive shell styling.
 - `src/tests/`: foundation, Overview, Live Session, clarification governance and scope approval state, timing, data-integrity, navigation, scroll and accessibility tests.
 
@@ -100,7 +100,7 @@ The illustrative scope score weights business criticality (30), demo value (25),
 
 Six typed success criteria reference canonical requirements and scope items. Approval requires complete functional/rule/non-functional workshop capture, all three consultant-confirmed clarifications, explicit requirement review, assumption acknowledgement, scope review and criteria review. All six mandatory criteria must remain Included; authentication and user-directory dependencies must remain Included or Mocked. Unsupported scope gaps visibly block approval. All canonical assumptions are shown for acknowledgement.
 
-Approve POC Scope & Create Baseline creates a frozen `PocBaseline` for RB-001 / v1. It snapshots all 20 canonical record IDs, governed confirmation IDs, the actual Included/Mocked/Excluded partition, decisions and reasons, six success criteria, resolved clarifications and acknowledged assumptions. Approval uses deterministic elapsed demo time and names Consultant as reviewer. The scope becomes locked; edits are rejected in the store as well as disabled in the UI. No agent starts, generation route opens or version transition runs. Reset restores the initial recommendations and clears all review/baseline state, including unsaved inspector notes.
+Approve POC Scope & Create Baseline creates a frozen `PocBaseline` for RB-001 / v1. It snapshots all 20 canonical record IDs, governed confirmation IDs, the actual Included/Mocked/Excluded partition, decisions and reasons, six success criteria, resolved clarifications and acknowledged assumptions. Approval uses deterministic elapsed demo time and names Consultant as reviewer. The scope becomes locked; edits are rejected in the store as well as disabled in the UI. Approval starts no agent or version transition. The ready baseline exposes a Start POC Generation navigation link; generation starts only with its explicit control. Reset restores the initial recommendations and clears all review/baseline state, including unsaved inspector notes.
 
 Requirement readiness stays on the shared Phase 3/4 model: full capture plus all three consultant reviews reaches 100%, rather than substituting the illustrative 93% example. Scope readiness separately represents five prerequisite reviews plus approval: 83% when reviews are complete and 100% after approval. Generation readiness is Awaiting approval, Ready, or Review required. Reopening or changing clarification review history after approval preserves the immutable RB-001 snapshot and returns generation readiness to Review required. Creating a replacement baseline is deferred to a later authorized phase.
 
@@ -128,22 +128,36 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 
 ## Routes
 
-| Route             | Workspace                | Implementation phase |
-| ----------------- | ------------------------ | -------------------- |
-| `/`               | Overview                 | 2                    |
-| `/session`        | Live Session             | 3                    |
-| `/requirements`   | Requirement Intelligence | 5.5                  |
-| `/clarifications` | Clarification Center     | 4                    |
-| `/scope`          | POC Scope                | 5                    |
-| `/generation`     | Generation               | 6                    |
-| `/preview`        | POC Preview              | 7                    |
-| `/traceability`   | Traceability             | 8                    |
-| `/feedback`       | Client Feedback          | 9                    |
-| `/value`          | Value Report             | 10                   |
+| Route             | Workspace                    | Implementation phase |
+| ----------------- | ---------------------------- | -------------------- |
+| `/`               | Overview                     | 2                    |
+| `/session`        | Live Session                 | 3                    |
+| `/requirements`   | Requirement Intelligence     | 5.5                  |
+| `/clarifications` | Clarification Center         | 4                    |
+| `/scope`          | POC Scope                    | 5                    |
+| `/generation`     | AI Generation Command Center | 6                    |
+| `/preview`        | POC Preview                  | 7                    |
+| `/traceability`   | Traceability                 | 8                    |
+| `/feedback`       | Client Feedback              | 9                    |
+| `/value`          | Value Report                 | 10                   |
+
+## Phase 6 governed generation
+
+`/generation` requires the existing generation-readiness selector, approved scope and RB-001. Missing prerequisites show a locked workspace with Scope/Clarification links. Any post-approval clarification-history drift blocks progression and review access while preserving the immutable baseline. No bypass or automatic baseline creation is provided.
+
+Eight logical responsibilities reuse the agent catalog: Requirement, Architecture, UI, Backend, Data, Test, Security Validation and Sandbox Preparation. States include waiting, queued, running, paused, completed and failed. The desktop orchestration uses `@xyflow/react`; mobile uses a readable vertical pipeline with explicit parallel/convergence labels. Keyboard-accessible agent buttons and an accessible graph summary expose status/progress without relying on color or motion.
+
+The deterministic 80-second schedule in `generationEvents.ts` loads RB-001 at 0s, maps requirements at 4–10s, prepares architecture at 12–20s, activates all three engineering branches at 22s, completes them independently at 38/42/45s, validates builds at 45–46s, generates and simulates tests at 47–60s, checks security at 62–70s, and prepares the sandbox at 72–80s. Directional edge motion only runs during active playback and is disabled for reduced motion. All pages share the existing 100ms shell clock, Zustand store and bounded demo speed. Navigation does not restart generation. Next Event applies all equal-time events together; Restart Generation resets engineering only; Reset Scenario clears the full engagement.
+
+Artifact metadata references canonical requirement IDs and producing agents. Shared assignment/approval artifacts and current-v1 tests reuse existing catalog records. Optional scope decisions filter frontend/API outputs and produce explicit dependency metadata; no external service is provisioned. All paths are illustrative labels: no files, APIs, code, tests, containers or environments are actually generated or executed. Security and sandbox results are clearly simulated and do not constitute production certification.
+
+The Phase 6 test contract contains **nine checks** mapped to the six approved Phase 5 success criteria: five current-v1 checks from the existing traceability seed plus four proof checks for create/status/dashboard/search. The future P2-change test TC-016 is deferred. The original Overview seed metrics remain unchanged. Counts and pass totals derive from the current baseline test plan rather than the specification's illustrative 32-test example. Artifact results become validated only after the complete build/test/security/sandbox pipeline succeeds.
+
+Use the full reviewed engagement: run or advance Live Session to completion, review and accept each clarification, acknowledge all four Scope review checkboxes, approve RB-001, then follow Start POC Generation. Generation exposes Start, Pause, Resume, deterministic Next Event, Restart Generation, Reset Scenario and speed controls. The completed simulation exposes Open POC Review, which navigates to the unchanged Phase 7 placeholder at `/preview`. POC Preview, full traceability and v2 remain unimplemented.
 
 ## Known limitations and specification concerns
 
-- Automated playback ends with Live Session capture. Phase 4 resolution is an explicit consultant action; reviews and question edits are local simulations. Phase 5 scope approval is explicit and local; generation, full traceability graphs and the generated mini application remain deferred.
+- Automated playback ends with Live Session capture. Phase 4 resolution is an explicit consultant action; reviews and question edits are local simulations. Phase 5 scope approval is explicit and local; generation is a deterministic frontend simulation; full traceability graphs and the generated mini application remain deferred.
 - Example metrics in the specification say 18 requirements and 4 clarifications; the explicit canonical catalog defines 20 total requirement records and 3 clarification questions. Preserve the canonical records and derive displayed counts in future phases.
 - Scope examples enumerate 5 excluded capabilities while their summary says 4. The catalog retains all 5 listed capabilities.
 - The approved Phase 9 feedback correction is a genuine approval expansion: P1-only in v1 → P1 and P2 in v2. Only future data and impact artifacts are defined; no change approval or v2 UI is implemented.

@@ -130,7 +130,7 @@ export interface AgentStatus {
   id: string;
   name: string;
   description: string;
-  status: 'waiting' | 'running' | 'complete' | 'failed';
+  status: 'waiting' | 'queued' | 'running' | 'completed' | 'failed' | 'paused';
   progress: number;
   startedAt?: string;
   completedAt?: string;
@@ -175,3 +175,33 @@ export interface ReadinessDimension {
   weight: number;
 }
 export type PocVersion = 'v1' | 'v2';
+
+export interface EngineeringAgent extends AgentStatus {
+  inputArtifactIds: string[];
+  outputArtifactIds: string[];
+  requirementIds: string[];
+}
+export interface EngineeringArtifact extends Artifact {
+  path: string;
+  generatedBy: string;
+  successCriterionIds: string[];
+}
+export interface EngineeringTest {
+  id: string;
+  label: string;
+  requirementIds: string[];
+  successCriterionId: string;
+  category: 'API' | 'Workflow' | 'UI';
+}
+export interface GenerationRuntime {
+  status: 'idle' | 'running' | 'paused' | 'completed' | 'failed';
+  elapsedMs: number;
+  eventCursor: number;
+  baselineId: string | null;
+  visibleEventIds: string[];
+  artifactStatuses: Record<string, 'generated' | 'validated'>;
+  testResults: Record<string, 'generated' | 'passed' | 'failed'>;
+  sandbox: 'waiting' | 'preparing' | 'ready' | 'failed';
+  selectedAgentId: string;
+  selectedArtifactId: string | null;
+}
