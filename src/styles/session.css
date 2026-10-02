@@ -829,3 +829,50 @@
     min-height: 90px;
   }
 }
+.clarification-answer {
+  border-top: 1px solid var(--border-strong);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.clarification-answer > svg {
+  display: block;
+  margin: 0 auto;
+  color: var(--accent-ink);
+}
+.clarification-answer ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: grid;
+  gap: 7px;
+  font-size: 11px;
+}
+.clarification-answer li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--cyan);
+}
+.ambiguity-alert.answer-confirmed {
+  border-left-color: var(--cyan);
+}
+.ambiguity-alert.answer-confirmed h3,
+.ambiguity-alert.answer-confirmed .clarification-status {
+  color: var(--cyan);
+}
+/* Keep the answer story readable without squeezing the insight feed below it. */
+@media (min-width: 901px) {
+  .session-workspace:has(.clarification-answer) .session-panel {
+    height: 960px;
+    min-height: 0;
+  }
+  .session-workspace:has(.clarification-answer) .intelligence-feed {
+    flex: 1;
+    height: auto;
+  }
+}
+@media (min-width: 901px) and (max-width: 1200px) {
+  .session-workspace:has(.clarification-answer) .session-panel {
+    height: 1100px;
+  }
+}

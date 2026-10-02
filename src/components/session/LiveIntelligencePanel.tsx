@@ -7,6 +7,7 @@ import {
   Check,
   Plus,
   ArrowRight,
+  ArrowDown,
 } from 'lucide-react';
 import { requirements, clarifications } from '@/data/requirements';
 import { transcript } from '@/data/transcript';
@@ -14,6 +15,7 @@ import { scenario } from '@/data/scenario';
 import {
   liveInsights,
   insightLabels,
+  priorityAnswerConfirmationIds,
   type LiveInsightEvent,
 } from '@/data/liveSession';
 import { useDemoStore } from '@/store/demoStore';
@@ -44,39 +46,87 @@ function AmbiguityAlert() {
   const open = useDemoStore((s) => s.openClarificationIds);
   const visible = useDemoStore((s) => s.visibleTranscriptMessageIds);
   const insights = useDemoStore((s) => s.visibleInsightEventIds);
+  const confirmed = useDemoStore((s) => s.confirmedRequirementIds);
+  const readiness = useDemoStore((s) => s.liveReadiness);
   const ambiguity = clarifications.find((q) => q.id === 'OQ-001')!;
   if (
     !insights.includes('insight-clarify-OQ-001') ||
     !open.includes(ambiguity.id)
   )
     return null;
+  const answer = transcript.find(
+    (m) => m.id === ambiguity.resolutionMessageId,
+  )!;
+  const answerVisible = visible.includes(answer.id);
+  const priorityConfirmed = priorityAnswerConfirmationIds.every((id) =>
+    confirmed.includes(id),
+  );
   return (
-    <aside className="ambiguity-alert" aria-labelledby="ambiguity-title">
+    <aside
+      className={`ambiguity-alert ${priorityConfirmed ? 'answer-confirmed' : ''}`}
+      aria-labelledby="ambiguity-title"
+    >
       <h3 id="ambiguity-title">
-        <TriangleAlert size={17} aria-hidden="true" />
-        Ambiguity detected <code>{ambiguity.id}</code>
+        {priorityConfirmed ? (
+          <Check size={17} aria-hidden="true" />
+        ) : (
+          <TriangleAlert size={17} aria-hidden="true" />
+        )}
+        {priorityConfirmed
+          ? 'Priority requirements confirmed'
+          : 'Ambiguity detected'}{' '}
+        <code>{ambiguity.id}</code>
       </h3>
       <blockquote>
         “{transcript.find((m) => m.id === ambiguity.sourceMessageId)!.text}”
       </blockquote>
       <p>
-        <strong>Missing definition</strong>
+        <strong>
+          {answerVisible ? 'Original ambiguity' : 'Missing definition'}
+        </strong>
         {ambiguity.reason}
       </p>
       <p>
         <strong>Suggested clarification</strong>“{ambiguity.question}”
       </p>
+      {answerVisible && (
+        <div className="clarification-answer">
+          <ArrowDown size={16} aria-hidden="true" />
+          <p>
+            <strong>Client answer · {answer.timestamp}</strong>
+          </p>
+          <blockquote>“{answer.text}”</blockquote>
+          {priorityConfirmed ? (
+            <>
+              <ul aria-label="Confirmed priority requirements">
+                {priorityAnswerConfirmationIds.map((id) => (
+                  <li key={id}>
+                    <Check size={14} aria-hidden="true" />
+                    <span>
+                      <code>{id}</code> confirmed
+                    </span>
+                  </li>
+                ))}
+                <li>
+                  <Check size={14} aria-hidden="true" />
+                  <span>POC readiness increased · {readiness}%</span>
+                </li>
+              </ul>
+            </>
+          ) : (
+            <p>Structuring the client’s answer…</p>
+          )}
+        </div>
+      )}
       <span className="clarification-status">
-        Needs clarification · review pending
+        {priorityConfirmed
+          ? 'Requirements confirmed · formal review pending'
+          : 'Needs clarification · review pending'}
       </span>
-      {visible.includes(ambiguity.resolutionMessageId) && (
+      {answerVisible && (
         <small>
-          Client response captured at{' '}
-          {
-            transcript.find((m) => m.id === ambiguity.resolutionMessageId)!
-              .timestamp
-          }
-          . Detailed clarification review is deferred to Phase 4.
+          Client response captured at {answer.timestamp}. Detailed clarification
+          review is deferred to Phase 4.
         </small>
       )}
     </aside>

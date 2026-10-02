@@ -93,6 +93,18 @@ describe('Live Session route', () => {
     expect(
       screen.getByText(/Client response captured at 02:30/),
     ).toBeInTheDocument();
+    const results = screen.getByRole('list', {
+      name: 'Confirmed priority requirements',
+    });
+    expect(results).toHaveTextContent('BR-001 confirmed');
+    expect(results).toHaveTextContent('FR-007 confirmed');
+    expect(results).toHaveTextContent('POC readiness increased');
+    expect(
+      screen.getByRole('heading', { name: /Priority requirements confirmed/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', { name: 'Illustrative POC readiness' }),
+    ).toHaveAttribute('value', '71');
     expect(useDemoStore.getState().resolvedClarificationIds).toEqual([]);
     expect(
       screen.getByText(

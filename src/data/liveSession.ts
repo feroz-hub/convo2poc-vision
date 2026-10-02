@@ -44,6 +44,9 @@ export interface LiveInsightEvent {
   requirementId?: string;
   actor?: Actor;
 }
+// Explicitly authorized Live Session confirmations from the canonical priority answer.
+// This does not resolve OQ-001 or confirm the separate approval-before-work rule.
+export const priorityAnswerConfirmationIds = ['BR-001', 'FR-007'] as const;
 export const sessionDurationMs = 80_000;
 export const transcriptTime = (index: number) => 2_000 + index * 4_800;
 // Reference canonical records; brief evidence is deliberately distinct from spoken evidence.
@@ -107,6 +110,7 @@ export const liveInsights: LiveInsightEvent[] = [
           requirementId: r.id,
         });
       } else if (
+        priorityAnswerConfirmationIds.some((id) => id === r.id) ||
         !clarifications.some((q) => q.affectedRequirementIds.includes(r.id))
       ) {
         events.push({

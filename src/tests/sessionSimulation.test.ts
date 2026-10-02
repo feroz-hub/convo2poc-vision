@@ -80,6 +80,16 @@ describe('canonical session events and integrity', () => {
     expect(store().resolvedClarificationIds).toEqual([]);
     expect(store().openClarificationIds).toContain('OQ-001');
     expect(store().confirmedRequirementIds).not.toContain('FR-007');
+    const beforeAnswer = store().liveReadiness;
+    stepUntil('event-insight-confirm-FR-007');
+    expect(store().confirmedRequirementIds).toEqual(
+      expect.arrayContaining(['BR-001', 'FR-007']),
+    );
+    expect(store().confirmedRequirementIds).not.toContain('BR-003');
+    expect(store().liveReadiness).toBeGreaterThan(beforeAnswer);
+    expect(store().openClarificationIds).toContain('OQ-001');
+    expect(store().resolvedClarificationIds).toEqual([]);
+    expect(store().scopeApproved).toBe(false);
   });
   it('updates readiness and derives final counters without advancing into later phases', () => {
     store().start();
@@ -89,7 +99,7 @@ describe('canonical session events and integrity', () => {
     );
     expect(selectSessionCounts(store())).toEqual({
       requirements: 10,
-      confirmed: 6,
+      confirmed: 7,
       clarifications: 3,
       actors: 4,
       rules: 4,
