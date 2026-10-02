@@ -50,8 +50,10 @@ export function TraceInspector({
     if (!record) return;
     if (record.kind === 'artifact' || record.kind === 'test')
       state.selectGenerationArtifact(record.canonicalId);
-    if (record.kind === 'feature')
+    if (record.kind === 'feature') {
+      state.selectPocVersion('v1');
       state.performPocAction({ type: 'feature', id: record.featureId });
+    }
   };
   return (
     <aside

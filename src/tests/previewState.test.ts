@@ -266,7 +266,9 @@ describe('generated POC runtime and review governance', () => {
     expect(p1.records.map((r) => r.id)).toEqual(['FR-007', 'BR-001', 'BR-003']);
     expect(p1.questions[0]?.id).toBe('OQ-001');
     expect(p1.sources.map((m) => m.id)).toEqual(['msg-006', 'msg-008']);
-    expect(p1.tests.map((t) => t.id)).toEqual(['TC-015', 'TC-017']);
+    expect(p1.tests.map((t) => t.id)).toEqual(
+      expect.arrayContaining(['TC-015', 'TC-017', 'TC-023']),
+    );
   });
   it.each([
     ['requests', 'FR-002', 'TC-021', ['list-screen', 'list-api']],

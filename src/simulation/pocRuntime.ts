@@ -9,6 +9,8 @@ import {
 } from '@/data/pocRuntime';
 import type { PocAction, PocRuntime, ServiceRequest } from '@/types/pocRuntime';
 import type { PocBaseline } from '@/types/domain';
+export const approvalRequired = (priority: string, version: string = 'v1') =>
+  priority === 'P1' || (version === 'v2' && priority === 'P2');
 export const createPocRuntime = (): PocRuntime => ({
   route: 'dashboard',
   userId: 'user-employee',
@@ -157,7 +159,7 @@ export function applyPocAction(
         );
       const sequence = runtime.sequence + 1;
       const id = `SR-${Math.max(...runtime.requests.map((r) => Number(r.id.slice(3)))) + 1}`;
-      const approval = action.priority === 'P1';
+      const approval = approvalRequired(action.priority, baseline.version);
       const record: ServiceRequest = {
         id,
         title: action.title.trim().slice(0, 120),
@@ -218,8 +220,13 @@ export function applyPocAction(
         return deny(
           'Only the assigned support engineer may progress this request.',
         );
-      if (selected.priority === 'P1' && selected.approvalStatus !== 'approved')
-        return deny('P1 requires manager approval before work begins.');
+      if (
+        approvalRequired(selected.priority, baseline.version) &&
+        selected.approvalStatus !== 'approved'
+      )
+        return deny(
+          `${selected.priority} requires manager approval before work begins.`,
+        );
       const next = {
         open: 'in-progress',
         'in-progress': 'resolved',
@@ -238,18 +245,20 @@ export function applyPocAction(
       if (
         !selected ||
         user.role !== 'manager' ||
-        selected.priority !== 'P1' ||
+        !approvalRequired(selected.priority, baseline.version) ||
         selected.approvalStatus !== 'pending' ||
         !feature('approval')
       )
-        return deny('Only managers may decide pending P1 approvals.');
+        return deny(
+          `Only managers may decide pending ${baseline.version === 'v2' ? 'P1/P2' : 'P1'} approvals.`,
+        );
       return change(
         {
           ...selected,
           approvalStatus: action.decision,
           status: action.decision === 'approved' ? 'open' : 'awaiting-approval',
         },
-        `Manager ${action.decision} P1 request`,
+        `Manager ${action.decision} ${selected.priority} request`,
         'approval',
       );
     case 'note':
@@ -287,8 +296,7 @@ export function applyPocAction(
           approvedAt: runtimeTime(runtime.sequence + 1),
         },
         sequence: runtime.sequence + 1,
-        notice:
-          'POC v1 approved for client demonstration. Internal approval only.',
+        notice: `POC ${baseline.version} approved for client demonstration. Internal approval only.`,
       };
     case 'presentation':
       return { ...runtime, presentation: action.enabled };

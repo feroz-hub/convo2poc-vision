@@ -103,7 +103,20 @@ export const routeObjects: RouteObject[] = [
                               ).TraceabilityPage,
                             }),
                           }
-                        : { element: <StagePlaceholder route={route} /> }),
+                        : route.path === '/feedback'
+                          ? {
+                              hydrateFallbackElement: (
+                                <section className="page-content" role="status">
+                                  Preparing Client Feedback…
+                                </section>
+                              ),
+                              lazy: async () => ({
+                                Component: (
+                                  await import('@/pages/FeedbackPage')
+                                ).FeedbackPage,
+                              }),
+                            }
+                          : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

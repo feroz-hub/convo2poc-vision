@@ -1,4 +1,21 @@
 import { create } from 'zustand';
+import type { FeedbackRuntime, ReviewKey } from '@/types/feedback';
+import {
+  createFeedbackRuntime,
+  createV2Runtime,
+  advanceFeedback,
+  advanceDelta,
+} from '@/simulation/feedbackEngine';
+import {
+  selectFeedbackReviewComplete,
+  selectV2Ready,
+} from './feedbackSelectors';
+import {
+  requirementRevisions,
+  criterionRevision,
+  feedbackMilestones,
+  deltaMilestones,
+} from '@/data/feedbackEvolution';
 import { featureEvidence } from '@/data/pocRuntime';
 import type { TraceView } from '@/types/traceExplorer';
 import { createPocRuntime, applyPocAction } from '@/simulation/pocRuntime';
@@ -34,6 +51,7 @@ import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  feedback: FeedbackRuntime;
   traceView: TraceView;
   pocRuntime: PocRuntime;
   generation: GenerationRuntime;
@@ -77,6 +95,7 @@ export interface DemoState {
   demoSpeed: number;
 }
 export const createInitialDemoState = (): DemoState => ({
+  feedback: createFeedbackRuntime(),
   traceView: {
     workflow: 'overview',
     selectedId: null,
@@ -134,6 +153,15 @@ export const createInitialDemoState = (): DemoState => ({
   demoSpeed: 1,
 });
 interface DemoActions {
+  startFeedback: () => void;
+  feedbackPlayback: (action: 'pause' | 'resume' | 'next') => void;
+  reviewChange: (key: ReviewKey, checked: boolean) => void;
+  decideChange: (decision: 'approve' | 'reject' | 'clarify') => void;
+  selectImpact: (id: string) => void;
+  restartFeedback: () => void;
+  startDelta: () => void;
+  deltaPlayback: (action: 'pause' | 'resume' | 'next' | 'restart') => void;
+  selectPocVersion: (version: PocVersion) => void;
   setTraceView: (view: Partial<TraceView>) => void;
   performPocAction: (action: PocAction) => void;
   resetPocData: () => void;
@@ -192,6 +220,168 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  startFeedback: () => {
+    const s = get();
+    if (
+      !selectPreviewReady(s) ||
+      !s.pocRuntime.approval ||
+      s.feedback.status !== 'waiting' ||
+      s.feedback.capture.status !== 'idle'
+    )
+      return;
+    set({
+      feedback: { ...s.feedback, capture: { status: 'running', elapsedMs: 0 } },
+    });
+  },
+  feedbackPlayback: (action) => {
+    const s = get(),
+      f = s.feedback;
+    if (
+      !selectPreviewReady(s) ||
+      !s.pocRuntime.approval ||
+      f.capture.status === 'idle' ||
+      f.capture.status === 'completed'
+    )
+      return;
+    if (action === 'next') {
+      const next = feedbackMilestones.find((e) => e.at > f.capture.elapsedMs);
+      if (next) set({ feedback: advanceFeedback(s, next.at) });
+    } else if (
+      (action === 'pause' && f.capture.status === 'running') ||
+      (action === 'resume' && f.capture.status === 'paused')
+    )
+      set({
+        feedback: {
+          ...f,
+          capture: {
+            ...f.capture,
+            status: action === 'pause' ? 'paused' : 'running',
+          },
+        },
+      });
+  },
+  reviewChange: (key, checked) => {
+    const s = get();
+    if (s.feedback.status === 'analyzed')
+      set({
+        feedback: {
+          ...s.feedback,
+          reviews: { ...s.feedback.reviews, [key]: checked },
+        },
+      });
+  },
+  decideChange: (decision) => {
+    const s = get(),
+      f = s.feedback;
+    if (
+      f.status !== 'analyzed' ||
+      !s.pocBaseline ||
+      !selectPreviewReady(s) ||
+      !s.pocRuntime.approval
+    )
+      return;
+    if (decision !== 'approve') {
+      set({
+        feedback: {
+          ...f,
+          status: decision === 'reject' ? 'rejected' : 'needs-clarification',
+        },
+      });
+      return;
+    }
+    if (
+      !selectFeedbackReviewComplete(s) ||
+      s.pocBaseline.decisions['scope-FR-007']?.decision !== 'included'
+    )
+      return;
+    const baseline = Object.freeze({
+      ...s.pocBaseline,
+      id: 'RB-002' as const,
+      version: 'v2' as const,
+      parentBaselineId: 'RB-001' as const,
+      changeRequestId: 'CR-001' as const,
+      revisionIds: Object.freeze(requirementRevisions.map((r) => r.id)),
+      criterionRevisionId: criterionRevision.id,
+      approvedAt: 'Client review 00:21',
+    });
+    set({
+      feedback: { ...f, status: 'approved', baseline },
+      approvedChangeIds: addId(s.approvedChangeIds, 'CR-001'),
+    });
+  },
+  selectImpact: (id) =>
+    set({ feedback: { ...get().feedback, selectedArtifactId: id } }),
+  restartFeedback: () =>
+    set({
+      feedback: createFeedbackRuntime(),
+      currentPocVersion: 'v1',
+      approvedChangeIds: without(get().approvedChangeIds, 'CR-001'),
+    }),
+  startDelta: () => {
+    const s = get();
+    if (
+      s.feedback.status === 'approved' &&
+      s.feedback.baseline &&
+      s.feedback.delta.status === 'idle' &&
+      selectPreviewReady(s)
+    )
+      set({
+        feedback: advanceDelta(
+          {
+            ...s,
+            feedback: {
+              ...s.feedback,
+              delta: { ...s.feedback.delta, status: 'running' },
+            },
+          },
+          0,
+        ),
+      });
+  },
+  deltaPlayback: (action) => {
+    const s = get(),
+      f = s.feedback;
+    if (!f.baseline || !selectPreviewReady(s) || f.delta.status === 'idle')
+      return;
+    if (action === 'restart') {
+      set({
+        feedback: {
+          ...f,
+          status: 'approved',
+          delta: {
+            status: 'idle',
+            elapsedMs: 0,
+            artifactStatuses: {},
+            testResults: {},
+          },
+          v2Runtime: null,
+        },
+        currentPocVersion: 'v1',
+      });
+      return;
+    }
+    if (f.delta.status === 'completed') return;
+    if (action === 'next') {
+      const next = deltaMilestones.find((e) => e.at > f.delta.elapsedMs);
+      if (next) set({ feedback: advanceDelta(s, next.at) });
+    } else if (
+      (action === 'pause' && f.delta.status === 'running') ||
+      (action === 'resume' && f.delta.status === 'paused')
+    )
+      set({
+        feedback: {
+          ...f,
+          delta: {
+            ...f.delta,
+            status: action === 'pause' ? 'paused' : 'running',
+          },
+        },
+      });
+  },
+  selectPocVersion: (version) => {
+    if (version === 'v1' || selectV2Ready(get()))
+      set({ currentPocVersion: version });
+  },
   setTraceView: (view) => {
     if (
       view.workflow &&
@@ -206,6 +396,25 @@ export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   performPocAction: (action) => {
     const state = get();
     if (!selectPreviewReady(state) || !state.pocBaseline) return;
+    if (state.currentPocVersion === 'v2') {
+      if (
+        !selectV2Ready(state) ||
+        !state.feedback.v2Runtime ||
+        !state.feedback.baseline
+      )
+        return;
+      set({
+        feedback: {
+          ...state.feedback,
+          v2Runtime: applyPocAction(
+            state.feedback.v2Runtime,
+            action,
+            state.feedback.baseline,
+          ),
+        },
+      });
+      return;
+    }
     if (
       action.type === 'approve-review' &&
       selectPreviewScopeGaps(state).length
@@ -215,7 +424,14 @@ export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
       pocRuntime: applyPocAction(state.pocRuntime, action, state.pocBaseline),
     });
   },
-  resetPocData: () => set({ pocRuntime: createPocRuntime() }),
+  resetPocData: () => {
+    const s = get();
+    if (s.currentPocVersion === 'v2') {
+      set({ feedback: { ...s.feedback, v2Runtime: createV2Runtime() } });
+      return;
+    }
+    set({ pocRuntime: createPocRuntime() });
+  },
   startGeneration: () => {
     const state = get();
     if (
@@ -515,6 +731,23 @@ export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   tick: (deltaMs) => {
     const state = get();
     if (!Number.isFinite(deltaMs) || deltaMs <= 0) return;
+    if (
+      state.feedback.capture.status === 'running' &&
+      selectPreviewReady(state)
+    )
+      set({
+        feedback: advanceFeedback(
+          state,
+          state.feedback.capture.elapsedMs + deltaMs * state.demoSpeed,
+        ),
+      });
+    if (state.feedback.delta.status === 'running' && selectPreviewReady(state))
+      set({
+        feedback: advanceDelta(
+          state,
+          state.feedback.delta.elapsedMs + deltaMs * state.demoSpeed,
+        ),
+      });
     if (state.generation.status === 'running')
       set(
         advanceGeneration(

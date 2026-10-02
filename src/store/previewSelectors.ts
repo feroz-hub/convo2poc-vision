@@ -3,6 +3,7 @@ import { getBaselineArtifacts, getBaselineTests } from '@/data/generation';
 import { requirements, clarifications } from '@/data/requirements';
 import { transcript } from '@/data/transcript';
 import { scopeItems } from '@/data/scope';
+import { requirementRevisions } from '@/data/feedbackEvolution';
 import { featureAvailable } from '@/simulation/pocRuntime';
 import { selectGenerationSummary } from './generationSelectors';
 import type { DemoState } from './demoStore';
@@ -10,9 +11,18 @@ export function selectFeatureEvidence(state: DemoState, id: string) {
   const feature =
     featureEvidence.find((f) => f.id === id) ?? featureEvidence[5]!;
   const baseline = state.pocBaseline;
-  const records = requirements.filter((r) =>
-    feature.requirementIds.includes(r.id),
-  );
+  const records = requirements
+    .filter((r) => feature.requirementIds.includes(r.id))
+    .map((r) =>
+      baseline?.version === 'v2'
+        ? {
+            ...r,
+            description:
+              requirementRevisions.find((rev) => rev.requirementId === r.id)
+                ?.revisedText ?? r.description,
+          }
+        : r,
+    );
   const questions = clarifications.filter((q) =>
     feature.clarificationIds.includes(q.id),
   );

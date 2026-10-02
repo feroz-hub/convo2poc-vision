@@ -10,8 +10,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useDemoStore } from '@/store/demoStore';
+import { usePreviewState } from '@/hooks/usePreviewState';
 import { selectPocRequests } from '@/store/previewSelectors';
-import { featureAvailable } from '@/simulation/pocRuntime';
+import { approvalRequired, featureAvailable } from '@/simulation/pocRuntime';
 import {
   pocCategories,
   pocPriorities,
@@ -33,8 +34,8 @@ export function FeatureEvidenceButton({
   id: string;
   label: string;
 }) {
-  const select = useDemoStore((s) => s.performPocAction);
-  const baseline = useDemoStore((s) => s.pocBaseline);
+  const select = usePreviewState((s) => s.performPocAction);
+  const baseline = usePreviewState((s) => s.pocBaseline);
   if (!featureAvailable(baseline, id)) return null;
   return (
     <button
@@ -68,7 +69,7 @@ export function PocStatusBadge({ request }: { request: ServiceRequest }) {
   );
 }
 function RequestRows({ requests }: { requests: ServiceRequest[] }) {
-  const act = useDemoStore((s) => s.performPocAction);
+  const act = usePreviewState((s) => s.performPocAction);
   return (
     <ul className="poc-request-list" aria-label="Service requests">
       {requests.map((r) => (
@@ -109,7 +110,8 @@ function RequestRows({ requests }: { requests: ServiceRequest[] }) {
   );
 }
 function PocDashboard() {
-  const runtime = useDemoStore((s) => s.pocRuntime);
+  const runtime = usePreviewState((s) => s.pocRuntime);
+  const runtimeVersion = usePreviewState((s) => s.currentPocVersion);
   const user = pocUsers.find((u) => u.id === runtime.userId)!;
   const recent = runtime.requests
     .filter((r) => user.role !== 'employee' || r.requesterId === user.id)
@@ -166,7 +168,11 @@ function PocDashboard() {
         </section>
         <section className="poc-card">
           <h3>Priority distribution</h3>
-          <p>P1 requires manager approval</p>
+          <p>
+            {runtimeVersion === 'v2'
+              ? 'P1 and P2 require manager approval'
+              : 'P1 requires manager approval'}
+          </p>
           <div className="poc-priority-chart">
             {pocPriorities.map((priority) => {
               const count = runtime.requests.filter(
@@ -196,7 +202,10 @@ function PocDashboard() {
                 .performPocAction({ type: 'feature', id: 'approval' })
             }
           >
-            See why P1 needs approval <ArrowRight size={14} />
+            {runtimeVersion === 'v2'
+              ? 'See why P1 and P2 need approval'
+              : 'See why P1 needs approval'}{' '}
+            <ArrowRight size={14} />
           </button>
         </section>
       </div>
@@ -218,7 +227,7 @@ function PocDashboard() {
   );
 }
 function PocRequestList() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const runtime = state.pocRuntime;
   const rows = selectPocRequests(state);
   return (
@@ -311,7 +320,8 @@ function PocRequestList() {
   );
 }
 function CreateRequestForm() {
-  const act = useDemoStore((s) => s.performPocAction);
+  const act = usePreviewState((s) => s.performPocAction);
+  const version = usePreviewState((s) => s.currentPocVersion);
   const [priority, setPriority] = useState<PocPriority>('P3');
   return (
     <>
@@ -378,14 +388,21 @@ function CreateRequestForm() {
             </select>
           </label>
         </div>
-        {priority === 'P1' && (
+        {approvalRequired(priority, version) && (
           <div className="poc-approval-banner">
             <ShieldCheck size={21} />
             <div>
               <strong>Manager Approval Required</strong>
-              <span>P1 work begins only after manager approval.</span>
+              <span>{priority} work begins only after manager approval.</span>
             </div>
-            <FeatureEvidenceButton id="approval" label="P1 Manager Approval" />
+            <FeatureEvidenceButton
+              id="approval"
+              label={
+                version === 'v2'
+                  ? 'P1 / P2 Manager Approval'
+                  : 'P1 Manager Approval'
+              }
+            />
           </div>
         )}
         <div className="poc-form-footer">
@@ -400,7 +417,7 @@ function CreateRequestForm() {
   );
 }
 function RequestDetail() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const runtime = state.pocRuntime;
   const r = runtime.requests.find((r) => r.id === runtime.selectedRequestId);
   const user = pocUsers.find((u) => u.id === runtime.userId)!;
@@ -465,59 +482,76 @@ function RequestDetail() {
           </dd>
         </div>
       </dl>
-      {r.priority === 'P1' && (
-        <section
-          className="poc-approval-banner"
-          aria-label="P1 approval workflow"
-        >
-          <ShieldCheck size={22} />
-          <div>
-            <strong>
-              {r.approvalStatus === 'approved'
-                ? 'Manager Approval Confirmed'
-                : r.approvalStatus === 'rejected'
-                  ? 'Manager Approval Rejected'
-                  : 'Manager Approval Required'}
-            </strong>
-            <span>
-              {r.approvalStatus === 'approved'
-                ? r.status === 'closed' || r.status === 'resolved'
-                  ? 'Manager approval is preserved in request history.'
-                  : 'Assigned engineer may begin work.'
-                : 'Work is blocked until a manager approves this P1 request.'}
-            </span>
-          </div>
-          <FeatureEvidenceButton id="approval" label="P1 Manager Approval" />
-          {user.role === 'manager' &&
-            r.approvalStatus === 'pending' &&
-            available('approval') && (
-              <div className="poc-approval-actions">
-                <button
-                  className="poc-primary-button"
-                  onClick={() =>
-                    state.performPocAction({
-                      type: 'approval',
-                      decision: 'approved',
-                    })
-                  }
-                >
-                  Approve P1 Request
-                </button>
-                <button
-                  className="poc-secondary-button"
-                  onClick={() =>
-                    state.performPocAction({
-                      type: 'approval',
-                      decision: 'rejected',
-                    })
-                  }
-                >
-                  Reject P1 Request
-                </button>
-              </div>
-            )}
-        </section>
-      )}
+      {state.currentPocVersion === 'v2' &&
+        r.priority === 'P2' &&
+        r.status === 'closed' &&
+        r.approvalStatus === 'not-required' && (
+          <p className="poc-help">
+            Closed under RB-001; the original approval policy is preserved in
+            history.
+          </p>
+        )}
+      {approvalRequired(r.priority, state.currentPocVersion) &&
+        r.approvalStatus !== 'not-required' && (
+          <section
+            className="poc-approval-banner"
+            aria-label={`${r.priority} approval workflow`}
+          >
+            <ShieldCheck size={22} />
+            <div>
+              <strong>
+                {r.approvalStatus === 'approved'
+                  ? 'Manager Approval Confirmed'
+                  : r.approvalStatus === 'rejected'
+                    ? 'Manager Approval Rejected'
+                    : 'Manager Approval Required'}
+              </strong>
+              <span>
+                {r.approvalStatus === 'approved'
+                  ? r.status === 'closed' || r.status === 'resolved'
+                    ? 'Manager approval is preserved in request history.'
+                    : 'Assigned engineer may begin work.'
+                  : `Work is blocked until a manager approves this ${r.priority} request.`}
+              </span>
+            </div>
+            <FeatureEvidenceButton
+              id="approval"
+              label={
+                state.currentPocVersion === 'v2'
+                  ? 'P1 / P2 Manager Approval'
+                  : 'P1 Manager Approval'
+              }
+            />
+            {user.role === 'manager' &&
+              r.approvalStatus === 'pending' &&
+              available('approval') && (
+                <div className="poc-approval-actions">
+                  <button
+                    className="poc-primary-button"
+                    onClick={() =>
+                      state.performPocAction({
+                        type: 'approval',
+                        decision: 'approved',
+                      })
+                    }
+                  >
+                    Approve {r.priority} Request
+                  </button>
+                  <button
+                    className="poc-secondary-button"
+                    onClick={() =>
+                      state.performPocAction({
+                        type: 'approval',
+                        decision: 'rejected',
+                      })
+                    }
+                  >
+                    Reject {r.priority} Request
+                  </button>
+                </div>
+              )}
+          </section>
+        )}
       {user.role === 'administrator' &&
         r.status !== 'closed' &&
         available('assignment') && (
@@ -573,8 +607,9 @@ function RequestDetail() {
           <p>
             {r.assignedEngineerId !== user.id
               ? 'Only the assigned engineer can update this request.'
-              : r.priority === 'P1' && r.approvalStatus !== 'approved'
-                ? 'P1 is waiting for manager approval.'
+              : approvalRequired(r.priority, state.currentPocVersion) &&
+                  r.approvalStatus !== 'approved'
+                ? `${r.priority} is waiting for manager approval.`
                 : nextLabel
                   ? `Next step: ${nextLabel}`
                   : 'The workflow is complete.'}
@@ -584,7 +619,8 @@ function RequestDetail() {
               className="poc-primary-button"
               disabled={
                 r.assignedEngineerId !== user.id ||
-                (r.priority === 'P1' && r.approvalStatus !== 'approved')
+                (approvalRequired(r.priority, state.currentPocVersion) &&
+                  r.approvalStatus !== 'approved')
               }
               onClick={() => state.performPocAction({ type: 'progress' })}
             >
@@ -651,7 +687,7 @@ function RequestDetail() {
   );
 }
 export function GeneratedPocApp() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const runtime = state.pocRuntime;
   const user = pocUsers.find((u) => u.id === runtime.userId)!;
   const nav = [
@@ -741,7 +777,9 @@ export function GeneratedPocApp() {
                 {n.label}
               </button>
             ))}
-          <span>RB-001 · v1</span>
+          <span>
+            {state.pocBaseline?.id} · {state.pocBaseline?.version}
+          </span>
         </nav>
         <div className="poc-content">
           <div className="poc-session-caption">

@@ -99,8 +99,8 @@ export interface PocSuccessCriterion {
   scopeItemIds: string[];
 }
 export interface PocBaseline {
-  readonly id: 'RB-001';
-  readonly version: 'v1';
+  readonly id: 'RB-001' | 'RB-002';
+  readonly version: 'v1' | 'v2';
   readonly requirementIds: readonly string[];
   readonly confirmedRequirementIds: readonly string[];
   readonly includedScopeItemIds: readonly string[];

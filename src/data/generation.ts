@@ -1,6 +1,7 @@
 import { artifacts } from './traceability';
 import { scopeItems, successCriteria } from './scope';
 import { requirements } from './requirements';
+import { p2ApprovalTest } from './feedbackEvolution';
 import type {
   EngineeringArtifact,
   EngineeringTest,
@@ -60,6 +61,14 @@ export const engineeringTests: EngineeringTest[] = [
     requirementIds: ['FR-005'],
     artifactIds: ['detail-screen', 'detail-api'],
     category: 'UI',
+  },
+  {
+    id: 'TC-023',
+    label: 'P2 does not require manager approval in v1',
+    requirementIds: ['FR-007', 'BR-003'],
+    successCriterionId: 'SC-004',
+    artifactIds: ['approval-screen', 'approval-api'],
+    category: 'Workflow',
   },
 ];
 const allCore = requirements
@@ -233,7 +242,24 @@ export function getBaselineArtifacts(
   const ruleIds = requirements
     .filter((r) => r.type === 'business-rule')
     .map((r) => r.id);
-  const planned = engineeringArtifacts.filter(
+  const versionArtifacts =
+    baseline.version === 'v2'
+      ? [
+          ...engineeringArtifacts.filter((a) => a.id !== 'TC-023'),
+          {
+            ...make(
+              p2ApprovalTest.id,
+              p2ApprovalTest.label,
+              'poc/tests/workflow/TC-016.spec',
+              'test',
+              'test',
+              p2ApprovalTest.requirementIds,
+            ),
+            successCriterionIds: ['SC-004'],
+          },
+        ]
+      : engineeringArtifacts;
+  const planned = versionArtifacts.filter(
     (a) =>
       (a.kind !== 'screen' && a.kind !== 'api') ||
       a.requirementIds.some((id) => activeIds.has(id) && id.startsWith('FR-')),
@@ -263,7 +289,11 @@ export function getBaselineArtifacts(
   }));
 }
 export function getBaselineTests(baseline: PocBaseline) {
-  return engineeringTests.filter((t) =>
+  const versionTests =
+    baseline.version === 'v2'
+      ? [...engineeringTests.filter((t) => t.id !== 'TC-023'), p2ApprovalTest]
+      : engineeringTests;
+  return versionTests.filter((t) =>
     t.successCriterionId
       ? baseline.successCriteriaIds.includes(t.successCriterionId) &&
         successCriteria.some((c) => c.id === t.successCriterionId)

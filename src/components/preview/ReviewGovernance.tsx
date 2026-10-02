@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Check, PackageCheck, ShieldCheck } from 'lucide-react';
-import { useDemoStore } from '@/store/demoStore';
+import { usePreviewState } from '@/hooks/usePreviewState';
 import { selectGenerationSummary } from '@/store/generationSelectors';
 import {
   selectPreviewScopeGaps,
@@ -10,7 +10,7 @@ import { sandboxPlan } from '@/data/generation';
 import { pocReviewItems } from '@/data/pocRuntime';
 import { scopeItems, scopeDecisionLabels } from '@/data/scope';
 export function ValidationEvidenceStrip() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const gen = selectGenerationSummary(state);
   const trace = selectPreviewTraceability(state);
   return (
@@ -58,7 +58,7 @@ export function ValidationEvidenceStrip() {
   );
 }
 export function ReviewGovernance() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const runtime = state.pocRuntime;
   const gaps = selectPreviewScopeGaps(state);
   const complete = pocReviewItems.every((i) => runtime.reviews[i.key]);
@@ -113,7 +113,7 @@ export function ReviewGovernance() {
           </h2>
           <p>
             {runtime.approval
-              ? 'POC v1 · RB-001 · Internal Sandbox'
+              ? `POC ${baseline.version} · ${baseline.id} · Internal Sandbox`
               : 'Validation is complete. A consultant reviews the prototype before a controlled demonstration.'}
           </p>
           <fieldset disabled={!!runtime.approval}>
@@ -150,6 +150,7 @@ export function ReviewGovernance() {
                   recorded.
                 </p>
                 <Link to="/traceability">Review Traceability ↗</Link>
+                <Link to="/feedback">Review Client Feedback ↗</Link>
               </div>
             </div>
           ) : (
@@ -196,7 +197,8 @@ export function ReviewGovernance() {
         <details>
           <summary>Demo script outline</summary>
           <p>
-            Create a request → assign an engineer → approve P1 as manager →
+            Create a request → assign an engineer → approve{' '}
+            {state.currentPocVersion === 'v2' ? 'P1 and P2' : 'P1'} as manager →
             progress status → inspect dashboard → search closed requests →
             review feature evidence.
           </p>

@@ -29,7 +29,7 @@ describe('canonical end-to-end traceability projections', () => {
       ),
     ).toBe(true);
   });
-  it('derives completed health from all eight workflows and eleven canonical tests', () => {
+  it('derives completed health from all eight workflows and canonical tests', () => {
     const model = selectTraceabilityModel(preparePreview());
     expect(model.health).toMatchObject({
       coverage: 100,

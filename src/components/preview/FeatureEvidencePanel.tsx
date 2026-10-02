@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { ArrowDown, FileCheck2, Fingerprint, X } from 'lucide-react';
-import { useDemoStore } from '@/store/demoStore';
+import { usePreviewState } from '@/hooks/usePreviewState';
 import { selectFeatureEvidence } from '@/store/previewSelectors';
+import { feedbackMessages } from '@/data/feedbackEvolution';
 import { agents } from '@/data/agents';
 import { transcript } from '@/data/transcript';
 import { scopeDecisionLabels } from '@/data/scope';
 export function FeatureEvidencePanel() {
-  const state = useDemoStore();
+  const state = usePreviewState();
   const data = selectFeatureEvidence(state, state.pocRuntime.selectedFeatureId);
   return (
     <aside className="preview-evidence" aria-label="Feature evidence">
@@ -17,7 +18,9 @@ export function FeatureEvidencePanel() {
             WHY THIS FEATURE EXISTS
           </span>
           <h2 id="feature-evidence-heading" tabIndex={-1}>
-            {data.feature.label}
+            {state.currentPocVersion === 'v2' && data.feature.id === 'approval'
+              ? 'P1 / P2 Manager Approval'
+              : data.feature.label}
           </h2>
         </div>
         <button
@@ -30,6 +33,22 @@ export function FeatureEvidencePanel() {
         </button>
       </header>
       <div className="preview-evidence-body">
+        {state.currentPocVersion === 'v2' && (
+          <section>
+            <h3>Approved change lineage</h3>
+            <p>
+              Client feedback → CR-001 → RB-002 · approval expanded to P1 and P2
+            </p>
+            <blockquote>
+              <cite>
+                {feedbackMessages[1].speaker} · {feedbackMessages[1].timestamp}{' '}
+                · {feedbackMessages[1].id}
+              </cite>
+              <p>“{feedbackMessages[1].text}”</p>
+            </blockquote>
+            <Link to="/feedback">View versioned change evidence ↗</Link>
+          </section>
+        )}
         <section>
           <h3>Approved requirements</h3>
           {data.records.map((r) => (
@@ -59,7 +78,10 @@ export function FeatureEvidencePanel() {
         />
         {data.sources.length > 0 ? (
           <section>
-            <h3>Conversation evidence</h3>
+            <h3>
+              Conversation evidence
+              {state.currentPocVersion === 'v2' ? ' · original discovery' : ''}
+            </h3>
             {data.sources.map((m) => (
               <blockquote key={m.id}>
                 <cite>
@@ -140,8 +162,16 @@ export function FeatureEvidencePanel() {
               <FileCheck2 size={14} />
               <div>
                 <Link
-                  to="/generation"
-                  onClick={() => state.selectGenerationArtifact(a.id)}
+                  to={
+                    state.currentPocVersion === 'v2'
+                      ? '/feedback'
+                      : '/generation'
+                  }
+                  onClick={() =>
+                    state.currentPocVersion === 'v2'
+                      ? state.selectImpact(a.id)
+                      : state.selectGenerationArtifact(a.id)
+                  }
                 >
                   {a.label} ↗
                 </Link>
@@ -155,7 +185,11 @@ export function FeatureEvidencePanel() {
           ))}
         </section>
         <section>
-          <h3>Phase 6 test evidence</h3>
+          <h3>
+            {state.currentPocVersion === 'v2'
+              ? 'RB-002 versioned test evidence'
+              : 'Phase 6 test evidence'}
+          </h3>
           {data.tests.length ? (
             data.tests.map((t) => (
               <article className="evidence-test" key={t.id}>
@@ -175,7 +209,7 @@ export function FeatureEvidencePanel() {
           )}
         </section>
         <p className="evidence-footnote">
-          Evidence metadata from RB-001 · simulated validation
+          Evidence metadata from {state.pocBaseline?.id} · simulated validation
         </p>
       </div>
     </aside>

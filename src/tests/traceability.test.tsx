@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { AppProviders } from '@/app/providers';
 import { routeObjects } from '@/app/routeObjects';
+import { engineeringTests } from '@/data/generation';
 import { useDemoStore } from '@/store/demoStore';
 import { preparePreview } from './previewFixtures';
 import { transcript } from '@/data/transcript';
@@ -68,7 +69,9 @@ describe('Traceability Explorer', () => {
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(
       screen.getByLabelText('Derived traceability health'),
-    ).toHaveTextContent('11/11');
+    ).toHaveTextContent(
+      `${engineeringTests.length}/${engineeringTests.length}`,
+    );
     expect(
       within(screen.getByTestId('trace-canvas')).getAllByRole('button'),
     ).toHaveLength(15);

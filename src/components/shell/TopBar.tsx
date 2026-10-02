@@ -22,6 +22,7 @@ export function TopBar({
   const generation = path === '/generation';
   const preview = path === '/preview';
   const traceability = path === '/traceability';
+  const feedback = path === '/feedback';
   const running = useDemoStore((state) => state.isRunning);
   const paused = useDemoStore((state) => state.isPaused);
   const complete = useDemoStore((state) => state.sessionComplete);
@@ -32,10 +33,14 @@ export function TopBar({
     navigate('/session');
   };
   const version = useDemoStore((state) => state.currentPocVersion);
+  const evolved = useDemoStore(
+    (state) => state.feedback.status === 'implemented',
+  );
+  const displayVersion = preview ? version : feedback && evolved ? 'v2' : 'v1';
   const { theme, toggleTheme } = useTheme();
   return (
     <header
-      className={`topbar ${overview ? 'topbar-overview' : session || clarifications || scope || requirements || generation || preview || traceability ? 'topbar-session' : ''}`}
+      className={`topbar ${overview ? 'topbar-overview' : session || clarifications || scope || requirements || generation || preview || traceability || feedback ? 'topbar-session' : ''}`}
     >
       <div className="brand-row">
         <span className="hcl-brand-area" aria-label="HCLTech brand area">
@@ -78,7 +83,7 @@ export function TopBar({
           <span>{scenario.client}</span>
         </div>
         <div className="session-meta">
-          <StatusBadge>POC {version}</StatusBadge>
+          <StatusBadge>POC {displayVersion}</StatusBadge>
           <span className="session-status">
             {session
               ? running
@@ -101,7 +106,8 @@ export function TopBar({
         !requirements &&
         !generation &&
         !preview &&
-        !traceability && (
+        !traceability &&
+        !feedback && (
           <div className="controls-row">
             <span className="playback-note">Playback available in Phase 3</span>
             <DemoControls />

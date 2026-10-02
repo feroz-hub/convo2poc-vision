@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Check,
   Eye,
@@ -9,6 +9,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useDemoStore } from '@/store/demoStore';
+import { usePreviewState } from '@/hooks/usePreviewState';
+import { selectV2Ready } from '@/store/feedbackSelectors';
 import { selectGenerationSummary } from '@/store/generationSelectors';
 import {
   selectPreviewReady,
@@ -23,8 +25,17 @@ import {
 import { sandboxPlan } from '@/data/generation';
 import '@/styles/preview.css';
 export function PreviewPage() {
-  const state = useDemoStore();
-  const ready = selectPreviewReady(state);
+  const original = useDemoStore();
+  const selectPocVersion = original.selectPocVersion;
+  const [params, setParams] = useSearchParams();
+  const requested = params.get('version');
+  const versionAvailable = selectV2Ready(original);
+  useEffect(() => {
+    selectPocVersion(requested === 'v2' && versionAvailable ? 'v2' : 'v1');
+  }, [requested, versionAvailable, selectPocVersion]);
+  const state = usePreviewState();
+  const ready =
+    selectPreviewReady(state) && (requested !== 'v2' || versionAvailable);
   const gen = selectGenerationSummary(state);
   const trace = selectPreviewTraceability(state);
   const runtime = state.pocRuntime;
@@ -78,13 +89,31 @@ export function PreviewPage() {
             </span>
             <h1>Generated POC Review</h1>
             <p>
-              Review the working prototype produced from approved baseline
-              RB-001.
+              Review the working prototype produced from approved baseline{' '}
+              {state.pocBaseline?.id ?? 'RB-001'}.
             </p>
           </div>
           <span className="preview-prototype-badge">
             Generated POC — Not Production Ready
           </span>
+          {versionAvailable && (
+            <label>
+              POC version{' '}
+              <select
+                aria-label="POC version"
+                value={state.currentPocVersion}
+                onChange={(e) => {
+                  original.selectPocVersion(
+                    e.target.value === 'v2' ? 'v2' : 'v1',
+                  );
+                  setParams({ version: e.target.value });
+                }}
+              >
+                <option value="v1">POC v1 · RB-001</option>
+                <option value="v2">POC v2 · RB-002</option>
+              </select>
+            </label>
+          )}
         </header>
       )}
       {!ready ? (
@@ -146,7 +175,9 @@ export function PreviewPage() {
                 <Check size={15} />
                 POC Ready for Human Review
               </span>
-              <span>RB-001 → validated artifacts → working workflow</span>
+              <span>
+                {state.pocBaseline!.id} → validated artifacts → working workflow
+              </span>
             </div>
             <div>
               <button
