@@ -16,22 +16,21 @@ const renderRoute = (path = '/') =>
   );
 describe('application shell and route placeholders', () => {
   beforeEach(() => useDemoStore.getState().reset());
-  it.each(routes.filter((route) => route.path !== '/'))(
-    'renders $path and marks its navigation active',
-    (route) => {
-      renderRoute(route.path);
-      expect(
-        screen.getByRole('heading', { level: 1, name: route.label }),
-      ).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: route.label })).toHaveAttribute(
-        'aria-current',
-        'page',
-      );
-      expect(
-        screen.getByText(`Planned for Phase ${route.phase}`),
-      ).toBeInTheDocument();
-    },
-  );
+  it.each(
+    routes.filter((route) => route.path !== '/' && route.path !== '/session'),
+  )('renders $path and marks its navigation active', (route) => {
+    renderRoute(route.path);
+    expect(
+      screen.getByRole('heading', { level: 1, name: route.label }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: route.label })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(
+      screen.getByText(`Planned for Phase ${route.phase}`),
+    ).toBeInTheDocument();
+  });
   it('supports manual navigation independently of demo state', async () => {
     const user = userEvent.setup();
     renderRoute();

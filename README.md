@@ -4,7 +4,7 @@
 
 Convo2POC is an enterprise-governed Conversation-to-POC concept for presales and consulting teams. This interactive vision prototype will demonstrate structured requirements, clarification, scope approval, controlled generation, validation, traceability, and a reviewed client feedback loop.
 
-The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1 and 2 are implemented.** `/` is the Executive Command Center; the remaining nine product routes are labeled placeholders. Phase 3 requires explicit approval.
+The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1, 2 and 3 are implemented.** `/` is the approved Executive Command Center and `/session` is the simulated Live Client Session. The remaining eight product routes are labeled placeholders. Phase 4 requires explicit approval.
 
 ## Getting started
 
@@ -38,7 +38,7 @@ npm run format:check
 
 React, strict TypeScript, Vite, Tailwind CSS with its Vite plugin, shadcn/ui, React Router, Zustand, Framer Motion, Lucide React, XYFlow, Recharts, Vitest, React Testing Library, ESLint, and Prettier. Installed versions are recorded in `package.json` and pinned by `package-lock.json`.
 
-The Overview route is lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
+The Overview and Live Session routes are lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
 
 The shadcn Button is local source in `src/components/ui`; `components.json` and the `@/` alias support adding components later. Semantic CSS tokens define intentionally designed light and dark themes: royal blue, cool white/pale blue surfaces in light mode, navy/blue-charcoal surfaces in dark mode, and restrained cyan/violet accents. The header uses an HCLTech typographic brand area and explicitly labels the experience “Internal Concept Prototype,” not an approved production product. The accessible theme switch stores a local presentation preference independently of demo state; dark remains the default, and the saved preference applies before paint. No official logo asset or remote brand dependency is introduced. Framer Motion's provider respects the user's reduced-motion preference. XYFlow and Recharts are installed for future phases and are not imported into the initial bundle.
 
@@ -51,9 +51,9 @@ The shadcn Button is local source in `src/components/ui`; `components.json` and 
 - `src/types/domain.ts`: requirements, transcript, scope, agents, validation, artifact graph, feedback, and version types.
 - `src/data/`: canonical local scenario catalogs. Product records stay out of JSX.
 - `src/store/demoStore.ts`: one in-memory Zustand store and a fresh-state factory.
-- `src/simulation/`: stages and a discriminated union of typed events.
+- `src/simulation/`: typed event contracts, Phase 3 schedule, pure reducer, global clock and shared illustrative readiness model.
 - `src/styles/`: theme and responsive shell styling.
-- `src/tests/`: foundation tests.
+- `src/tests/`: foundation, Overview and Live Session state, timing, data-integrity, scroll and accessibility tests.
 
 No authentication, backend, storage service, LLM, API key, remote font, or runtime network call is required. The built application works offline when served locally. A future SPA host must serve `index.html` for deep links.
 
@@ -63,11 +63,17 @@ A fictional Acme Enterprise Services workshop covers Service Request Management 
 
 ## Simulation and state
 
-Phase 1 establishes event types, not the running simulation engine. `DemoEvent` ties each event discriminator to its payload type. Future scheduling and reduction must remain independent of pages, deterministic, and driven through the shared store. No timers run in this phase.
+Phase 3 uses a deterministic, typed event schedule in `src/simulation/sessionEvents.ts` and a pure reducer in `demoEngine.ts`. The shell attaches one 100 ms clock to the global Zustand store, with cleanup on unmount. Pause blocks clock advances; Resume continues from the same elapsed time; Next Event advances to the next timestamp and applies all events at that timestamp atomically. Restart resets and starts playback; Reset restores the idle canonical initial state. Navigation does not create additional clocks or reset progress. The internal demoSpeed multiplier remains bounded to 0.25–4.
+
+The full 16-message canonical transcript plays in 80 seconds at default speed. Turns begin at 2 seconds and are spaced 4.8 seconds apart. Requirement detections follow their source by 0.9 seconds, actors by 1.2 seconds, clarification signals by 1.5 seconds and explicit-statement confirmations by 1.8 seconds. Speaking activity lasts 3.2 seconds per turn. Canonical workshop timestamps remain visible separately from elapsed demo time. Five scenario-brief records arrive in the first 1.1 seconds and are clearly labeled as brief evidence, rather than spoken claims. Requirements, confidence, sources, actor names and questions are referenced from the canonical catalogs; no copies of requirement content live in UI files.
+
+Live state adds visible insight IDs, actors, assumptions, confirmed IDs, active speaker, transcript position, event cursor, readiness and session completion. Counters derive from visible canonical records: Requirements includes functional and non-functional records; rules, assumptions and open questions have separate counters. At completion these are 10 requirements, 6 confirmed requirements, 4 business rules, 4 actors, 3 assumptions and 3 open clarification questions. Confirmation means an explicit client statement, not human approval. Records affected by unresolved questions are never auto-confirmed.
+
+The single shared illustrative readiness formula in `readiness.ts` weights business-problem capture (25%), actor coverage (15%), functional coverage (30%), business-rule coverage (15%), brief coverage (5%), and reviewed clarification coverage (10%). Coverage denominators come from canonical catalogs. Readiness starts at 0% and ends at 90% because all clarification reviews remain pending. Client responses are displayed as captured evidence; no clarification resolution, scope approval, generation or version change is implemented in Phase 3.
 
 The initial store is idle with no visible transcript, detected requirements, approvals, or baseline. POC version starts at v1 as a label, not a generated result. All agents and build checks wait. Reset creates fresh arrays and records and preserves store actions. Demo speed accepts values from 0.25 to 4.
 
-Playback controls and Settings are visibly disabled until their phases are implemented. Reset works without page refresh and does not change the current route. Sidebar navigation remains available regardless of demo state. Smaller screens use a keyboard-accessible navigation drawer with focus containment and Escape dismissal.
+Playback controls are enabled on `/session`; Settings and playback on later-phase placeholders remain disabled. Reset works without page refresh and does not change the current route. Sidebar navigation remains available regardless of demo state. Smaller screens use a keyboard-accessible navigation drawer with focus containment and Escape dismissal.
 
 ## Mock data model and integrity
 
@@ -75,7 +81,7 @@ The catalog includes 8 functional requirements, 4 business rules, 2 non-function
 
 Scope includes all 8 functional requirements, 2 mocked dependencies, and 5 excluded capabilities. The initial traceability catalog provides the specified FR-003 conversation → requirement → user story → screen/API → test chain. CR-001 expands manager approval from P1-only to P1 and P2, referencing FR-007 and BR-003 plus approval rule, workflow, UI, API/logic, and test artifacts present in that catalog. V1 canonical requirements remain P1-only. These are planned mock records, not generated or approved outcomes.
 
-Catalog counts derive from the records. Overview metrics derive from the canonical catalogs: requirement count, open/resolved questions, complete seed traceability paths, and planned POC tests. Traceability coverage requires conversation → requirement → user story → screen and API → test paths and uses functional requirements as the denominator. Current seed coverage is 1 of 8 (rounded to 13%); six planned POC tests are waiting, so Tests Passed is 0 / 6. This is explicitly labeled catalog telemetry, not live results. The 25-minute Time-to-POC is a typed illustrative estimate in `src/data/validation.ts`, not a measured claim. Readiness and complete outcome metrics remain deferred.
+Catalog counts derive from the records. Overview metrics derive from the canonical catalogs: requirement count, open/resolved questions, complete seed traceability paths, and planned POC tests. Traceability coverage requires conversation → requirement → user story → screen and API → test paths and uses functional requirements as the denominator. Current seed coverage is 1 of 8 (rounded to 13%); six planned POC tests are waiting, so Tests Passed is 0 / 6. This is explicitly labeled catalog telemetry, not live results. The 25-minute Time-to-POC is a typed illustrative estimate in `src/data/validation.ts`, not a measured claim. Live readiness is illustrative and documented above; complete outcome metrics remain deferred.
 
 ## Routes
 
@@ -94,7 +100,7 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 
 ## Known limitations and specification concerns
 
-- No playback orchestration, approval flow, graphs, charts, or generated mini application is implemented. Phase 2 implements only the Overview.
+- Playback ends with Live Session capture. Clarification management, approval flows, graphs, charts and the generated mini application remain deferred to their authorized phases.
 - Example metrics in the specification say 18 requirements and 4 clarifications; the explicit canonical catalog defines 20 total requirement records and 3 clarification questions. Preserve the canonical records and derive displayed counts in future phases.
 - Scope examples enumerate 5 excluded capabilities while their summary says 4. The catalog retains all 5 listed capabilities.
 - The approved Phase 9 feedback correction is a genuine approval expansion: P1-only in v1 → P1 and P2 in v2. Only future data and impact artifacts are defined; no change approval or v2 UI is implemented.

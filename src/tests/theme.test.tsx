@@ -5,7 +5,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { AppProviders } from '@/app/providers';
 import { routeObjects } from '@/app/routeObjects';
 import { useDemoStore } from '@/store/demoStore';
-const renderTheme = () =>
+const renderTheme = async () => {
   render(
     <AppProviders>
       <RouterProvider
@@ -15,14 +15,16 @@ const renderTheme = () =>
       />
     </AppProviders>,
   );
+  await screen.findByRole('heading', { level: 1, name: 'Live Session' });
+};
 describe('internal presentation themes', () => {
   beforeEach(() => {
     document.documentElement.classList.add('dark');
     localStorage.clear();
     useDemoStore.getState().reset();
   });
-  it('identifies the brand area and concept status without a production claim', () => {
-    renderTheme();
+  it('identifies the brand area and concept status without a production claim', async () => {
+    await renderTheme();
     expect(screen.getByLabelText('HCLTech brand area')).toBeInTheDocument();
     expect(screen.getByText('Internal Concept Prototype')).toBeInTheDocument();
     expect(
@@ -33,7 +35,7 @@ describe('internal presentation themes', () => {
   });
   it('switches both ways and persists the chosen theme', async () => {
     const user = userEvent.setup();
-    renderTheme();
+    await renderTheme();
     await user.click(
       screen.getByRole('button', { name: 'Switch to light mode' }),
     );
@@ -48,7 +50,7 @@ describe('internal presentation themes', () => {
   });
   it('preserves theme through manual navigation and demo reset', async () => {
     const user = userEvent.setup();
-    renderTheme();
+    await renderTheme();
     await user.click(
       screen.getByRole('button', { name: 'Switch to light mode' }),
     );

@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import { attachDemoClock } from '@/simulation/demoEngine';
+import { useDemoStore } from '@/store/demoStore';
 export function AppShell() {
+  useEffect(
+    () => attachDemoClock((delta) => useDemoStore.getState().tick(delta)),
+    [],
+  );
   const [open, setOpen] = useState(false);
   const shell = useRef<HTMLDivElement>(null);
   useEffect(() => {

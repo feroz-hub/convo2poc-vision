@@ -1,7 +1,7 @@
 # Project instructions
 
 Read docs/CONVO2POC_MASTER_SPEC.md fully; it is the source of truth.
-Implement only the explicitly authorized phase. Phases 1 and 2 are complete; Phase 3 needs explicit user approval.
+Implement only the explicitly authorized phase. Phases 1, 2 and 3 are complete; Phase 4 needs explicit user approval. Preserve the approved Overview. Phase 3 captures ambiguity and later conversation responses but leaves clarification review unresolved.
 Preserve strict TypeScript, accessible UI, reduced motion, and shared design tokens.
 Keep domain data separate from UI and use one coherent Zustand demo store.
 Use deterministic simulations. No backend, real authentication, LLM calls, API keys, or production integrations without explicit authorization.

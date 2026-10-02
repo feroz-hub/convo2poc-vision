@@ -13,7 +13,12 @@ export function TopBar({
   onOpen: () => void;
   navigationOpen: boolean;
 }) {
-  const overview = useLocation().pathname === '/';
+  const path = useLocation().pathname;
+  const overview = path === '/';
+  const session = path === '/session';
+  const running = useDemoStore((state) => state.isRunning);
+  const paused = useDemoStore((state) => state.isPaused);
+  const complete = useDemoStore((state) => state.sessionComplete);
   const navigate = useNavigate();
   const reset = useDemoStore((state) => state.reset);
   const start = () => {
@@ -23,7 +28,9 @@ export function TopBar({
   const version = useDemoStore((state) => state.currentPocVersion);
   const { theme, toggleTheme } = useTheme();
   return (
-    <header className={`topbar ${overview ? 'topbar-overview' : ''}`}>
+    <header
+      className={`topbar ${overview ? 'topbar-overview' : session ? 'topbar-session' : ''}`}
+    >
       <div className="brand-row">
         <span className="hcl-brand-area" aria-label="HCLTech brand area">
           HCLTech
@@ -66,12 +73,22 @@ export function TopBar({
         </div>
         <div className="session-meta">
           <StatusBadge>POC {version}</StatusBadge>
-          <span className="session-status">○ Demo session idle</span>
+          <span className="session-status">
+            {session
+              ? running
+                ? '● Simulated session live'
+                : paused
+                  ? 'Ⅱ Session paused'
+                  : complete
+                    ? '✓ Session captured'
+                    : '○ Ready to run'
+              : '○ Demo session idle'}
+          </span>
           <LockKeyhole size={15} aria-label="Sandbox environment" />
         </div>
         {overview && <DemoControls presentation onStart={start} />}
       </div>
-      {!overview && (
+      {!overview && !session && (
         <div className="controls-row">
           <span className="playback-note">Playback available in Phase 3</span>
           <DemoControls />

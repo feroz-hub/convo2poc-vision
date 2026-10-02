@@ -136,6 +136,7 @@ describe('Overview executive command center', () => {
     await userEvent
       .setup()
       .click(screen.getByRole('button', { name: 'Explore the demo' }));
+    await screen.findByRole('heading', { level: 1, name: 'Live Session' });
     expect(router.state.location.pathname).toBe('/session');
     expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
   });
@@ -171,12 +172,11 @@ describe('Overview executive command center', () => {
     await userEvent
       .setup()
       .click(screen.getByRole('button', { name: 'Run Demo' }));
+    await screen.findByRole('heading', { level: 1, name: 'Live Session' });
     expect(router.state.location.pathname).toBe('/session');
     expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
-    expect(
-      screen.getByRole('button', { name: 'Pause / Resume' }),
-    ).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Next stage' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next event' })).toBeEnabled();
   });
   it('keeps source-backed requirement artifacts and the v2 destination visible without animation', async () => {
     motionPreference.reduced = true;
@@ -211,12 +211,15 @@ describe('Overview executive command center', () => {
     await userEvent
       .setup()
       .click(screen.getByRole('button', { name: 'Start Demo' }));
+    await screen.findByRole('heading', { level: 1, name: 'Live Session' });
     expect(router.state.location.pathname).toBe('/session');
     expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());
     expect(
       screen.getByRole('heading', { level: 1, name: 'Live Session' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Planned for Phase 3')).toBeInTheDocument();
+    expect(
+      screen.getByText('Waiting for requirement signals'),
+    ).toBeInTheDocument();
   });
   it('Explore Workflow focuses the workflow while preserving route and state', async () => {
     const scroll = vi.fn();

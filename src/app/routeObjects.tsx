@@ -19,7 +19,19 @@ export const routeObjects: RouteObject[] = [
                 Component: (await import('@/pages/OverviewPage')).OverviewPage,
               }),
             }
-          : { element: <StagePlaceholder route={route} /> }),
+          : route.path === '/session'
+            ? {
+                hydrateFallbackElement: (
+                  <section className="page-content" role="status">
+                    Preparing the Live Session workspace…
+                  </section>
+                ),
+                lazy: async () => ({
+                  Component: (await import('@/pages/LiveSessionPage'))
+                    .LiveSessionPage,
+                }),
+              }
+            : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

@@ -27,4 +27,4 @@ export type DemoEvent = {
     payload: EventPayloads[K];
   };
 }[keyof EventPayloads];
-// Event scheduling and reduction are deferred to playback phases.
+// Future-stage payload contracts remain deferred; Phase 3 schedules only SessionEvent in sessionEvents.ts.
