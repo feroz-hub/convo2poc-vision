@@ -25,7 +25,8 @@ describe('application shell and route placeholders', () => {
         route.path !== '/scope' &&
         route.path !== '/requirements' &&
         route.path !== '/generation' &&
-        route.path !== '/preview',
+        route.path !== '/preview' &&
+        route.path !== '/traceability',
     ),
   )('renders $path and marks its navigation active', (route) => {
     renderRoute(route.path);
@@ -66,7 +67,7 @@ describe('application shell and route placeholders', () => {
       currentPocVersion: 'v2',
       detectedRequirementIds: ['FR-001'],
     });
-    renderRoute('/traceability');
+    renderRoute('/feedback');
     expect(screen.getByRole('button', { name: 'Run Demo' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
     expect(screen.getByText('POC v1')).toBeInTheDocument();
@@ -74,7 +75,7 @@ describe('application shell and route placeholders', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'Traceability',
+        name: 'Client Feedback',
       }),
     ).toBeInTheDocument();
   });

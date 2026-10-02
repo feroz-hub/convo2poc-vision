@@ -4,7 +4,7 @@
 
 Convo2POC is an enterprise-governed Conversation-to-POC concept for presales and consulting teams. This interactive vision prototype will demonstrate structured requirements, clarification, scope approval, controlled generation, validation, traceability, and a reviewed client feedback loop.
 
-The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–7, including Phase 5.5 Requirement Intelligence, are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. `/requirements` is the structured requirement model and evidence inspector. `/generation` is the governed AI Generation Command Center. `/preview` is the generated POC and internal human review workspace. The three later-phase routes remain labeled placeholders. Phase 8 requires explicit approval.
+The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–8, including Phase 5.5 Requirement Intelligence, are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. `/requirements` is the structured requirement model and evidence inspector. `/generation` is the governed AI Generation Command Center. `/preview` is the generated POC and internal human review workspace. `/traceability` is the read-only end-to-end evidence explorer. The two later-phase routes remain labeled placeholders. Phase 9 requires explicit approval.
 
 ## Getting started
 
@@ -137,7 +137,7 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 | `/scope`          | POC Scope                    | 5                    |
 | `/generation`     | AI Generation Command Center | 6                    |
 | `/preview`        | POC Preview                  | 7                    |
-| `/traceability`   | Traceability                 | 8                    |
+| `/traceability`   | Traceability Explorer        | 8                    |
 | `/feedback`       | Client Feedback              | 9                    |
 | `/value`          | Value Report                 | 10                   |
 
@@ -153,7 +153,7 @@ Artifact metadata references canonical requirement IDs and producing agents. Sha
 
 The Phase 6 test contract contains **eleven checks**: nine mapped to the six approved Phase 5 success criteria, plus dedicated requirement checks TC-021 (FR-002, submitted requests) and TC-022 (FR-005, details/history). The two requirement checks reference their generated UI/API artifacts; neither invents a new approved success criterion. The future P2-change test TC-016 is deferred. The original Overview seed metrics remain unchanged. Counts and pass totals derive from the current baseline test plan rather than the specification's illustrative 32-test example. Artifact results become validated only after the complete build/test/security/sandbox pipeline succeeds.
 
-Use the full reviewed engagement: run or advance Live Session to completion, review and accept each clarification, acknowledge all four Scope review checkboxes, approve RB-001, then follow Start POC Generation. Generation exposes Start, Pause, Resume, deterministic Next Event, Restart Generation, Reset Scenario and speed controls. The completed simulation exposes Open POC Review at `/preview`. Full traceability and v2 remain unimplemented.
+Use the full reviewed engagement: run or advance Live Session to completion, review and accept each clarification, acknowledge all four Scope review checkboxes, approve RB-001, then follow Start POC Generation. Generation exposes Start, Pause, Resume, deterministic Next Event, Restart Generation, Reset Scenario and speed controls. The completed simulation exposes Open POC Review at `/preview`. The Traceability Explorer connects current-v1 evidence; v2 remains unimplemented.
 
 ## Phase 7 generated POC and human review
 
@@ -165,21 +165,29 @@ The isolated `pocRuntime` slice in the existing Zustand store contains 12 determ
 
 Reset POC Data restores only runtime records, navigation, role, evidence and review state. It preserves meeting, requirements, clarification audit, approved scope and generation. Generation restart withdraws the previous runtime/review; full Scenario Reset restores all initial state. Runtime interactions never mutate canonical catalogs or the frozen baseline.
 
-Nine feature mappings cover the eight core functional capabilities plus mocked identity. Requirement/BR IDs, transcript evidence, clarification answers, frozen scope reasons, generated artifact metadata and Phase 6 test records are resolved from shared catalogs. Cross-route links retain requirement, source and scope selection. Artifact links select the Generation inspector. P1 exposes OQ-001, the original ambiguous statement, the client answer and FR-007 / BR-001 / BR-003. No Phase 8 graph is implemented.
+Nine feature mappings cover the eight core functional capabilities plus mocked identity. Requirement/BR IDs, transcript evidence, clarification answers, frozen scope reasons, generated artifact metadata and Phase 6 test records are resolved from shared catalogs. Cross-route links retain requirement, source and scope selection. Artifact links select the Generation inspector. P1 exposes OQ-001, the original ambiguous statement, the client answer and FR-007 / BR-001 / BR-003. The Phase 8 graph projects these same canonical references.
 
 Feature traceability is derived: **8/8** core features have requirement, source, validated artifact and passing canonical Phase 6 test evidence, giving **100%** complete feature chains after generation completes. Coverage decreases if mapped test evidence is missing or fails. The shared generation plan includes TC-021 and TC-022 automatically; no preview-only test model or forced coverage score is used. Included/Mocked scope decisions govern feature availability. Additional future-scope overrides have metadata only, are disclosed as gaps, and block client-demo approval.
 
-A consultant must explicitly check core workflow, approved scope, success criteria, limitations and client-demo content before Approve POC for Client Demonstration. Approval records Consultant / RB-001 / deterministic demo time, remains internal, and enables navigation to the unchanged Phase 8 placeholder. The conceptual demo package and script outline provide no downloads or external sending.
+A consultant must explicitly check core workflow, approved scope, success criteria, limitations and client-demo content before Approve POC for Client Demonstration. Approval records Consultant / RB-001 / deterministic demo time, remains internal, and enables navigation to the Traceability Explorer. The conceptual demo package and script outline provide no downloads or external sending.
 
 ## Known limitations and specification concerns
 
-- Automated playback ends with Live Session capture. Phase 4 resolution is an explicit consultant action; reviews and question edits are local simulations. Phase 5 scope approval is explicit and local; generation is a deterministic frontend simulation; full traceability graphs and the generated mini application remain deferred.
+- Automated playback ends with Live Session capture. Phase 4 resolution is an explicit consultant action; reviews and question edits are local simulations. Phase 5 scope approval is explicit and local; generation is a deterministic frontend simulation; the generated mini application and evidence explorer are frontend simulations.
 - Example metrics in the specification say 18 requirements and 4 clarifications; the explicit canonical catalog defines 20 total requirement records and 3 clarification questions. Preserve the canonical records and derive displayed counts in future phases.
 - Scope examples enumerate 5 excluded capabilities while their summary says 4. The catalog retains all 5 listed capabilities.
 - The approved Phase 9 feedback correction is a genuine approval expansion: P1-only in v1 → P1 and P2 in v2. Only future data and impact artifacts are defined; no change approval or v2 UI is implemented.
-- The current traceability chain is a seed for Phase 8, not a claim of full coverage.
+- Overview retains its approved seed-catalog telemetry. The explorer separately calculates completed core-workflow chains from captured evidence, governance and current generation state.
 - State is intentionally in memory and resets on reload. Responsive layout targets desktop and laptop first.
 
 ## Future integration points
 
 Mock transcript → meeting/audio input; requirement events → intelligence API; clarification and scope catalogs → agents; simulation → workflow engine; mock preview → generated repository and sandbox; artifact graph → actual traceability; illustrative metrics → engagement telemetry. None are implemented or required for this foundation.
+
+## Phase 8 · End-to-end Traceability Explorer
+
+`/traceability` uses @xyflow/react for a five-lane overview with three representative workflows. Selecting a workflow reveals its conversation, clarification where applicable, requirements, frozen scope decisions, success criteria where present, artifacts, working feature and canonical tests. The inspector exposes exact source content, connected records and links to the existing workspaces. Search, workflow selection, health filters, keyboard-selectable nodes and an accessible evidence list provide alternate ways to explore. Resizing refits the canvas; mobile stacks the inspector below the graph. Motion is restrained and the graph has no animated edges.
+
+`traceabilitySelectors.ts` is a read-only projection of existing catalogs and the coherent demo store. Only view selection and filters are new state. Reset view changes no engagement data; scenario reset restores the view. Initial records distinguish planned metadata from captured evidence and execution. Complete chains require captured source messages, consultant clarification review, locked scope, validated outputs, passing mapped tests and a ready POC. Coverage is the proportion of complete scoped core workflows, not a forced score. Mapping health is separate from execution; source evidence counts workflows with captured evidence. Mocked identity and deferred capabilities remain disclosed outside the core-workflow denominator.
+
+Tests cover canonical references, all eight node types, dedicated FR-002 / FR-005 checks, initial/completed/failed/reopened/excluded states, graph path selection, filters, deep links and navigation without canonical mutations. Phase 9 feedback remains a placeholder.

@@ -90,7 +90,20 @@ export const routeObjects: RouteObject[] = [
                               .PreviewPage,
                           }),
                         }
-                      : { element: <StagePlaceholder route={route} /> }),
+                      : route.path === '/traceability'
+                        ? {
+                            hydrateFallbackElement: (
+                              <section className="page-content" role="status">
+                                Preparing Traceability Explorer…
+                              </section>
+                            ),
+                            lazy: async () => ({
+                              Component: (
+                                await import('@/pages/TraceabilityPage')
+                              ).TraceabilityPage,
+                            }),
+                          }
+                        : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

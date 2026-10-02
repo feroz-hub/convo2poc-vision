@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { featureEvidence } from '@/data/pocRuntime';
+import type { TraceView } from '@/types/traceExplorer';
 import { createPocRuntime, applyPocAction } from '@/simulation/pocRuntime';
 import { selectPreviewReady, selectPreviewScopeGaps } from './previewSelectors';
 import type { PocRuntime, PocAction } from '@/types/pocRuntime';
@@ -32,6 +34,7 @@ import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  traceView: TraceView;
   pocRuntime: PocRuntime;
   generation: GenerationRuntime;
   requirementView: RequirementView;
@@ -74,6 +77,12 @@ export interface DemoState {
   demoSpeed: number;
 }
 export const createInitialDemoState = (): DemoState => ({
+  traceView: {
+    workflow: 'overview',
+    selectedId: null,
+    search: '',
+    filter: 'all',
+  },
   pocRuntime: createPocRuntime(),
   requirementView: {
     selectedId: 'FR-007',
@@ -125,6 +134,7 @@ export const createInitialDemoState = (): DemoState => ({
   demoSpeed: 1,
 });
 interface DemoActions {
+  setTraceView: (view: Partial<TraceView>) => void;
   performPocAction: (action: PocAction) => void;
   resetPocData: () => void;
   startGeneration: () => void;
@@ -182,6 +192,17 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  setTraceView: (view) => {
+    if (
+      view.workflow &&
+      view.workflow !== 'overview' &&
+      !featureEvidence.some(
+        (f) => f.id === view.workflow && f.id !== 'identity',
+      )
+    )
+      return;
+    set({ traceView: { ...get().traceView, ...view } });
+  },
   performPocAction: (action) => {
     const state = get();
     if (!selectPreviewReady(state) || !state.pocBaseline) return;

@@ -200,7 +200,9 @@ describe('AI Generation Command Center', () => {
       a.tick(80000);
     });
     expect(
-      screen.getByRole('heading', { name: 'POC Ready for Human Review' }),
+      await screen.findByRole('heading', {
+        name: 'POC Ready for Human Review',
+      }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('region', { name: 'Success-criterion validation' }),

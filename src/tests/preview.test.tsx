@@ -10,6 +10,10 @@ import { pocReviewItems } from '@/data/pocRuntime';
 import { transcript } from '@/data/transcript';
 import { getBaselineTests } from '@/data/generation';
 Element.prototype.scrollIntoView = vi.fn();
+// Canvas layout is covered by the explorer tests and browser review.
+vi.mock('@/components/traceability/TraceGraph', () => ({
+  TraceGraph: () => null,
+}));
 async function renderPreview() {
   const router = createMemoryRouter(routeObjects, {
     initialEntries: ['/preview'],
@@ -247,7 +251,7 @@ describe('generated POC review workspace', () => {
       screen.getByRole('heading', { name: 'Generated POC Review' }),
     ).toBeInTheDocument();
   });
-  it('requires explicit review checks before approval and links to unchanged Phase 8 placeholder', async () => {
+  it('requires explicit review checks before approval and links to the Traceability Explorer', async () => {
     preparePreview();
     const router = await renderPreview();
     const user = userEvent.setup();
@@ -265,8 +269,10 @@ describe('generated POC review workspace', () => {
     await user.click(
       screen.getByRole('link', { name: 'Review Traceability ↗' }),
     );
+    expect(
+      await screen.findByRole('heading', { name: 'Traceability Explorer' }),
+    ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/traceability');
-    expect(screen.getByText('Planned for Phase 8')).toBeInTheDocument();
   });
   it('resets only runtime POC data while full scenario reset relocks preview', async () => {
     preparePreview();
