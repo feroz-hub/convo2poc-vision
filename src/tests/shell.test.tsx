@@ -17,7 +17,12 @@ const renderRoute = (path = '/') =>
 describe('application shell and route placeholders', () => {
   beforeEach(() => useDemoStore.getState().reset());
   it.each(
-    routes.filter((route) => route.path !== '/' && route.path !== '/session'),
+    routes.filter(
+      (route) =>
+        route.path !== '/' &&
+        route.path !== '/session' &&
+        route.path !== '/clarifications',
+    ),
   )('renders $path and marks its navigation active', (route) => {
     renderRoute(route.path);
     expect(

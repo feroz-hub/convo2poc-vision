@@ -31,7 +31,19 @@ export const routeObjects: RouteObject[] = [
                     .LiveSessionPage,
                 }),
               }
-            : { element: <StagePlaceholder route={route} /> }),
+            : route.path === '/clarifications'
+              ? {
+                  hydrateFallbackElement: (
+                    <section className="page-content" role="status">
+                      Preparing the Clarification Center…
+                    </section>
+                  ),
+                  lazy: async () => ({
+                    Component: (await import('@/pages/ClarificationsPage'))
+                      .ClarificationsPage,
+                  }),
+                }
+              : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

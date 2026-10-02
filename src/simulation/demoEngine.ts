@@ -47,12 +47,15 @@ function applyEvent(state: DemoState, event: SessionEvent): DemoState {
           state.detectedAssumptionIds,
           requirement.id,
         );
-      else if (requirement.type === 'open-question')
+      else if (
+        requirement.type === 'open-question' &&
+        !state.resolvedClarificationIds.includes(requirement.id)
+      )
         next.openClarificationIds = add(
           state.openClarificationIds,
           requirement.id,
         );
-      else
+      else if (requirement.type !== 'open-question')
         next.detectedRequirementIds = add(
           state.detectedRequirementIds,
           requirement.id,

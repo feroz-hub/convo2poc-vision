@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import {
@@ -123,10 +124,13 @@ function AmbiguityAlert() {
           ? 'Requirements confirmed · formal review pending'
           : 'Needs clarification · review pending'}
       </span>
+      <Link to={`/clarifications?selected=${ambiguity.id}`}>
+        Review Clarification →
+      </Link>
       {answerVisible && (
         <small>
-          Client response captured at {answer.timestamp}. Detailed clarification
-          review is deferred to Phase 4.
+          Client response captured at {answer.timestamp}. Consultant review is
+          available in the Clarification Center.
         </small>
       )}
     </aside>

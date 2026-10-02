@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowDown, MessageSquare, ScanText } from 'lucide-react';
@@ -96,15 +97,18 @@ function TranscriptMessage({
   );
 }
 export function ConversationPanel() {
+  const [sourceParams] = useSearchParams();
+  const sourceId = sourceParams.get('source');
+  const sourceEvidence = transcript.find((m) => m.id === sourceId);
   const visible = useDemoStore((s) => s.visibleTranscriptMessageIds);
   const insights = useDemoStore((s) => s.visibleInsightEventIds);
   const running = useDemoStore((s) => s.isRunning);
   const elapsed = useDemoStore((s) => s.elapsedMs);
   const speakerUntil = useDemoStore((s) => s.speakerUntilMs);
   const position = useDemoStore((s) => s.currentTranscriptPosition);
-  const [following, setFollowing] = useState(true);
+  const [following, setFollowing] = useState(!sourceEvidence);
   const feed = useRef<HTMLDivElement>(null);
-  const follow = useRef(true);
+  const follow = useRef(!sourceEvidence);
   const reduced = useReducedMotion();
   const scrollToLive = () => {
     if (feed.current)
@@ -133,6 +137,19 @@ export function ConversationPanel() {
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
+  const sourceVisible = !!sourceEvidence && visible.includes(sourceEvidence.id);
+  useEffect(() => {
+    if (!sourceEvidence || !sourceVisible) return;
+    follow.current = false;
+    const element = document.getElementById(`transcript-${sourceEvidence.id}`);
+    element?.setAttribute('tabindex', '-1');
+    element?.focus({ preventScroll: true });
+    if (element && feed.current)
+      feed.current.scrollTo({
+        top: element.offsetTop - feed.current.offsetTop - 12,
+        behavior: 'instant',
+      });
+  }, [sourceEvidence, sourceVisible]);
   return (
     <section
       className="conversation-panel session-panel"
@@ -148,6 +165,24 @@ export function ConversationPanel() {
         </span>
       </div>
       <ParticipantStrip />
+      {sourceEvidence && (
+        <aside
+          className="session-source-evidence"
+          aria-label="Linked transcript evidence"
+        >
+          <strong>
+            Linked evidence · {sourceEvidence.speaker} ·{' '}
+            {sourceEvidence.timestamp} · {sourceEvidence.id}
+          </strong>
+          <p>{sourceEvidence.text}</p>
+          {!visible.includes(sourceEvidence.id) && (
+            <small>
+              Recorded workshop excerpt. Playback has not reached this turn.
+            </small>
+          )}
+        </aside>
+      )}
+
       <div
         className="transcript-feed"
         ref={feed}

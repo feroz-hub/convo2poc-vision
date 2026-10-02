@@ -4,7 +4,7 @@
 
 Convo2POC is an enterprise-governed Conversation-to-POC concept for presales and consulting teams. This interactive vision prototype will demonstrate structured requirements, clarification, scope approval, controlled generation, validation, traceability, and a reviewed client feedback loop.
 
-The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1, 2 and 3 are implemented.** `/` is the approved Executive Command Center and `/session` is the simulated Live Client Session. The remaining eight product routes are labeled placeholders. Phase 4 requires explicit approval.
+The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–3 and the authorized Phase 4 Clarification Center are implemented.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, and `/clarifications` is the governed evidence-review workspace. The other seven product routes remain labeled placeholders, including Requirement Intelligence, which was outside this Phase 4 authorization. Phase 5 requires explicit approval.
 
 ## Getting started
 
@@ -38,7 +38,7 @@ npm run format:check
 
 React, strict TypeScript, Vite, Tailwind CSS with its Vite plugin, shadcn/ui, React Router, Zustand, Framer Motion, Lucide React, XYFlow, Recharts, Vitest, React Testing Library, ESLint, and Prettier. Installed versions are recorded in `package.json` and pinned by `package-lock.json`.
 
-The Overview and Live Session routes are lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
+The Overview, Live Session and Clarification Center routes are lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
 
 The shadcn Button is local source in `src/components/ui`; `components.json` and the `@/` alias support adding components later. Semantic CSS tokens define intentionally designed light and dark themes: royal blue, cool white/pale blue surfaces in light mode, navy/blue-charcoal surfaces in dark mode, and restrained cyan/violet accents. The header uses an HCLTech typographic brand area and explicitly labels the experience “Internal Concept Prototype,” not an approved production product. The accessible theme switch stores a local presentation preference independently of demo state; dark remains the default, and the saved preference applies before paint. No official logo asset or remote brand dependency is introduced. Framer Motion's provider respects the user's reduced-motion preference. XYFlow and Recharts are installed for future phases and are not imported into the initial bundle.
 
@@ -47,13 +47,14 @@ The shadcn Button is local source in `src/components/ui`; `components.json` and 
 - `src/app/`: shared route metadata, router, and providers.
 - `src/components/shell/`: responsive navigation, engagement top bar, and demo controls.
 - `src/components/common/` and `src/components/ui/`: reusable presentation primitives.
-- `src/pages/`: the reusable, explicitly labeled phase placeholder.
+- `src/pages/`: approved Overview, Live Session, Clarification Center and explicitly labeled phase placeholders.
+- `src/components/clarifications/`: queue, five-stage evidence workspace, consultant approval actions and impact/history panel.
 - `src/types/domain.ts`: requirements, transcript, scope, agents, validation, artifact graph, feedback, and version types.
 - `src/data/`: canonical local scenario catalogs. Product records stay out of JSX.
 - `src/store/demoStore.ts`: one in-memory Zustand store and a fresh-state factory.
 - `src/simulation/`: typed event contracts, Phase 3 schedule, pure reducer, global clock and shared illustrative readiness model.
 - `src/styles/`: theme and responsive shell styling.
-- `src/tests/`: foundation, Overview and Live Session state, timing, data-integrity, scroll and accessibility tests.
+- `src/tests/`: foundation, Overview, Live Session and clarification governance state, timing, data-integrity, navigation, scroll and accessibility tests.
 
 No authentication, backend, storage service, LLM, API key, remote font, or runtime network call is required. The built application works offline when served locally. A future SPA host must serve `index.html` for deep links.
 
@@ -75,6 +76,18 @@ The initial store is idle with no visible transcript, detected requirements, app
 
 Playback controls are enabled on `/session`; Settings and playback on later-phase placeholders remain disabled. Reset works without page refresh and does not change the current route. Sidebar navigation remains available regardless of demo state. Smaller screens use a keyboard-accessible navigation drawer with focus containment and Escape dismissal.
 
+## Phase 4 clarification governance
+
+`/clarifications` uses the three immutable canonical questions and their exact transcript sources/answers. Direct navigation exposes the recorded workshop evidence for inspection without starting or advancing Live Session. Queue status derives from playback capture and consultant actions: Open → Evidence Captured → Needs Review → Confirmed. Consultant rejection and reopening return the item to Open. The queue supports All, Open, Needs Review and Resolved; Needs Review includes captured answers awaiting inspection, and Resolved includes consultant-confirmed records.
+
+The existing Zustand store owns selection, filter, saved local question edits, accepted suggestions, reviewed evidence, rejected/reopened IDs, resolved IDs and deterministic history entries. Accept Resolution requires Review Evidence first. Reopening removes the consultant approval and its readiness contribution while preserving the earlier live transcript confirmations. `selectGovernedRequirementIds` overlays consultant-confirmed canonical outputs on the independently captured live confirmations. No immutable catalog is rewritten. No scope approval, locked/versioned baseline, generation or version transition occurs.
+
+The priority answer's 56% → 71% capture uplift is derived by replaying canonical events into an isolated snapshot using the same readiness reducer. Consultant review contributes separately to the existing 10% clarification weight: after complete capture, OQ-001 approval increases current readiness from 90% to 93%, and approving all three reaches 100%. Round-to-integer increments can be 3 or 4 points. Readiness impact cards show both capture context and the current review projection; they never substitute a fixed score for global state.
+
+Live Session's Review Clarification link uses `/clarifications?selected=OQ-001`. View in Live Session uses `/session?source=msg-008` (or the selected source). A revealed turn receives focus and scroll positioning; an unrevealed turn is shown as a labeled recorded excerpt without changing playback. History uses canonical workshop timestamps for evidence and sequence plus elapsed demo time for consultant actions, with no wall-clock randomness. Reset and restart restore all review state.
+
+The workspace uses three panels at desktop sizes, queue/workspace with impact below at 1024, and a readable stack at 390. Status uses text and icons, selection uses pressed semantics, focus states are visible, announcements are concise and polite, and reduced motion disables entrance and transition effects.
+
 ## Mock data model and integrity
 
 The catalog includes 8 functional requirements, 4 business rules, 2 non-functional requirements, 3 assumptions, and 3 open questions. Sources reference actual message IDs and timestamps. Brief-derived records are labeled accordingly. Two supplementary transcript turns provide explicit evidence for FR-005 and BR-004.
@@ -90,7 +103,7 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 | `/`               | Overview                 | 2                    |
 | `/session`        | Live Session             | 3                    |
 | `/requirements`   | Requirement Intelligence | 4                    |
-| `/clarifications` | Clarifications           | 4                    |
+| `/clarifications` | Clarification Center     | 4                    |
 | `/scope`          | POC Scope                | 5                    |
 | `/generation`     | Generation               | 6                    |
 | `/preview`        | POC Preview              | 7                    |
@@ -100,7 +113,7 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 
 ## Known limitations and specification concerns
 
-- Playback ends with Live Session capture. Clarification management, approval flows, graphs, charts and the generated mini application remain deferred to their authorized phases.
+- Automated playback ends with Live Session capture. Phase 4 resolution is an explicit consultant action; reviews and question edits are local simulations. Scope approval, generation, graphs, charts and the generated mini application remain deferred.
 - Example metrics in the specification say 18 requirements and 4 clarifications; the explicit canonical catalog defines 20 total requirement records and 3 clarification questions. Preserve the canonical records and derive displayed counts in future phases.
 - Scope examples enumerate 5 excluded capabilities while their summary says 4. The catalog retains all 5 listed capabilities.
 - The approved Phase 9 feedback correction is a genuine approval expansion: P1-only in v1 → P1 and P2 in v2. Only future data and impact artifacts are defined; no change approval or v2 UI is implemented.

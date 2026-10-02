@@ -876,3 +876,44 @@
     height: 1100px;
   }
 }
+
+/* Evidence navigation preserves playback position and manual following behavior. */
+.session-source-evidence {
+  padding: 14px 20px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.session-source-evidence strong {
+  color: var(--accent-ink);
+  font-size: 11px;
+}
+.session-source-evidence p {
+  margin: 7px 0;
+  line-height: 1.6;
+}
+.session-source-evidence small {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+.transcript-message:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+.ambiguity-alert > a {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  font-size: 11px;
+  text-decoration: none;
+}
+.ambiguity-alert > a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}

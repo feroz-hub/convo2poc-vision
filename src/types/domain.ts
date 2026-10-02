@@ -37,6 +37,28 @@ export interface Requirement {
   actors: Actor[];
   tags: string[];
 }
+export type ClarificationCategory =
+  | 'ambiguity'
+  | 'business-rule'
+  | 'role'
+  | 'scope'
+  | 'integration'
+  | 'assumption';
+export type ClarificationStatus =
+  'open' | 'evidence-captured' | 'needs-review' | 'resolved' | 'confirmed';
+export type ClarificationFilter = 'all' | 'open' | 'needs-review' | 'resolved';
+export interface ClarificationHistoryEntry {
+  clarificationId: string;
+  action:
+    | 'suggestion-accepted'
+    | 'question-edited'
+    | 'evidence-reviewed'
+    | 'confirmed'
+    | 'rejected'
+    | 'reopened';
+  elapsedMs: number;
+  sequence: number;
+}
 export interface Clarification {
   id: string;
   requirementId: string;
@@ -45,7 +67,9 @@ export interface Clarification {
   question: string;
   reason: string;
   options: string[];
-  status: 'open' | 'resolved';
+  category: ClarificationCategory;
+  impact: 'high' | 'medium';
+  status: ClarificationStatus;
   resolution: string;
   resolutionMessageId: string;
 }
