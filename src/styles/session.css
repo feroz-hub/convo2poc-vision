@@ -917,3 +917,10 @@
   outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
+
+.session-requirements-link {
+  display: block;
+  margin: 0 18px 14px;
+  font-size: 0.75rem;
+  color: var(--primary);
+}

@@ -63,6 +63,9 @@ export function ClarificationImpactPanel({ item }: { item: Clarification }) {
               <small>
                 {confirmed ? '✓ Confirmed by consultant' : 'Proposed update'}
               </small>
+              <Link to={`/requirements?selected=${r.id}`}>
+                Inspect requirement ↗
+              </Link>
             </li>
           ))}
         </ul>

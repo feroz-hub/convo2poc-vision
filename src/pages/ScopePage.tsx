@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Layers3, RotateCcw, ShieldCheck } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { scopeItems } from '@/data/scope';
@@ -15,6 +16,12 @@ import { ScopeApprovalGate } from '@/components/scope/ScopeApprovalGate';
 import { Button } from '@/components/ui/button';
 import '@/styles/scope.css';
 export function ScopePage() {
+  const [params, setParams] = useSearchParams();
+  const requested = params.get('selected');
+  const select = useDemoStore((s) => s.selectScopeItem);
+  useEffect(() => {
+    if (requested) select(requested);
+  }, [requested, select]);
   const [resetRevision, setResetRevision] = useState(0);
   const selected = useDemoStore((s) => s.selectedScopeItemId);
   const overrides = useDemoStore((s) => s.scopeOverrides);
@@ -45,6 +52,7 @@ export function ScopePage() {
           variant="outline"
           onClick={() => {
             reset();
+            setParams({});
             setResetRevision((revision) => revision + 1);
           }}
         >

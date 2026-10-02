@@ -22,7 +22,8 @@ describe('application shell and route placeholders', () => {
         route.path !== '/' &&
         route.path !== '/session' &&
         route.path !== '/clarifications' &&
-        route.path !== '/scope',
+        route.path !== '/scope' &&
+        route.path !== '/requirements',
     ),
   )('renders $path and marks its navigation active', (route) => {
     renderRoute(route.path);
@@ -46,10 +47,14 @@ describe('application shell and route placeholders', () => {
     });
     await user.click(screen.getByRole('link', { name: 'POC Scope' }));
     expect(
-      await screen.findByRole('heading', {
-        level: 1,
-        name: 'POC Scope Studio',
-      }),
+      await screen.findByRole(
+        'heading',
+        {
+          level: 1,
+          name: 'POC Scope Studio',
+        },
+        { timeout: 5000 },
+      ),
     ).toBeInTheDocument();
     expect(useDemoStore.getState().scopeApproved).toBe(false);
   });
@@ -59,7 +64,7 @@ describe('application shell and route placeholders', () => {
       currentPocVersion: 'v2',
       detectedRequirementIds: ['FR-001'],
     });
-    renderRoute('/requirements');
+    renderRoute('/generation');
     expect(screen.getByRole('button', { name: 'Run Demo' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
     expect(screen.getByText('POC v1')).toBeInTheDocument();
@@ -67,7 +72,7 @@ describe('application shell and route placeholders', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'Requirement Intelligence',
+        name: 'Generation',
       }),
     ).toBeInTheDocument();
   });

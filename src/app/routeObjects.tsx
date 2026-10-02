@@ -54,7 +54,19 @@ export const routeObjects: RouteObject[] = [
                       Component: (await import('@/pages/ScopePage')).ScopePage,
                     }),
                   }
-                : { element: <StagePlaceholder route={route} /> }),
+                : route.path === '/requirements'
+                  ? {
+                      hydrateFallbackElement: (
+                        <section className="page-content" role="status">
+                          Preparing Requirement Intelligence…
+                        </section>
+                      ),
+                      lazy: async () => ({
+                        Component: (await import('@/pages/RequirementsPage'))
+                          .RequirementsPage,
+                      }),
+                    }
+                  : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

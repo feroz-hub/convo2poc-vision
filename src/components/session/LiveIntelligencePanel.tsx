@@ -202,6 +202,9 @@ export function LiveIntelligencePanel() {
         <span>Evidence → Structure</span>
       </div>
       <IntelligenceSummary />
+      <Link className="session-requirements-link" to="/requirements">
+        Inspect Requirement Intelligence →
+      </Link>
       <div className="insight-signal" aria-hidden="true">
         {latest ? (
           <motion.div

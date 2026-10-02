@@ -18,6 +18,7 @@ export function TopBar({
   const session = path === '/session';
   const clarifications = path === '/clarifications';
   const scope = path === '/scope';
+  const requirements = path === '/requirements';
   const running = useDemoStore((state) => state.isRunning);
   const paused = useDemoStore((state) => state.isPaused);
   const complete = useDemoStore((state) => state.sessionComplete);
@@ -31,7 +32,7 @@ export function TopBar({
   const { theme, toggleTheme } = useTheme();
   return (
     <header
-      className={`topbar ${overview ? 'topbar-overview' : session || clarifications || scope ? 'topbar-session' : ''}`}
+      className={`topbar ${overview ? 'topbar-overview' : session || clarifications || scope || requirements ? 'topbar-session' : ''}`}
     >
       <div className="brand-row">
         <span className="hcl-brand-area" aria-label="HCLTech brand area">
@@ -90,7 +91,7 @@ export function TopBar({
         </div>
         {overview && <DemoControls presentation onStart={start} />}
       </div>
-      {!overview && !session && !clarifications && !scope && (
+      {!overview && !session && !clarifications && !scope && !requirements && (
         <div className="controls-row">
           <span className="playback-note">Playback available in Phase 3</span>
           <DemoControls />

@@ -17,11 +17,13 @@ import type {
   ScopeOverride,
   ScopeReviewKey,
   PocBaseline,
+  RequirementView,
 } from '@/types/domain';
 import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  requirementView: RequirementView;
   selectedScopeItemId: string;
   scopeOverrides: Record<string, ScopeOverride>;
   scopeReviews: Record<ScopeReviewKey, boolean>;
@@ -61,6 +63,13 @@ export interface DemoState {
   demoSpeed: number;
 }
 export const createInitialDemoState = (): DemoState => ({
+  requirementView: {
+    selectedId: 'FR-007',
+    type: 'all',
+    status: 'all',
+    actor: null,
+    search: '',
+  },
   selectedScopeItemId: 'scope-FR-007',
   scopeOverrides: {},
   scopeReviews: {
@@ -105,6 +114,7 @@ export const createInitialDemoState = (): DemoState => ({
   demoSpeed: 1,
 });
 interface DemoActions {
+  setRequirementView: (view: Partial<RequirementView>) => void;
   selectScopeItem: (id: string) => void;
   setScopeDecision: (
     id: string,
@@ -152,6 +162,11 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  setRequirementView: (view) => {
+    if (view.selectedId && !requirements.some((r) => r.id === view.selectedId))
+      return;
+    set({ requirementView: { ...get().requirementView, ...view } });
+  },
   selectScopeItem: (id) => {
     if (scopeItems.some((item) => item.id === id))
       set({ selectedScopeItemId: id });

@@ -37,6 +37,19 @@ export interface Requirement {
   actors: Actor[];
   tags: string[];
 }
+export type IntelligenceStatus =
+  | 'detected'
+  | 'needs-clarification'
+  | 'confirmed'
+  | 'needs-review'
+  | 'acknowledged';
+export interface RequirementView {
+  selectedId: string;
+  type: RequirementType | 'all';
+  status: IntelligenceStatus | 'all';
+  actor: Actor | null;
+  search: string;
+}
 export type ClarificationCategory =
   | 'ambiguity'
   | 'business-rule'

@@ -4,7 +4,7 @@
 
 Convo2POC is an enterprise-governed Conversation-to-POC concept for presales and consulting teams. This interactive vision prototype will demonstrate structured requirements, clarification, scope approval, controlled generation, validation, traceability, and a reviewed client feedback loop.
 
-The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–5 are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. The other six product routes remain labeled placeholders, including Requirement Intelligence, which was outside the authorized Phase 4 scope. Phase 6 requires explicit approval.
+The [master specification](docs/CONVO2POC_MASTER_SPEC.md) defines the product and phase boundaries. The canonical typed catalogs in `src/data/` are the single source of truth for scenario content and counts, following the approved corrections. **Phases 1–5 and Phase 5.5 Requirement Intelligence are implemented within their authorized workspaces.** `/` is the approved Executive Command Center, `/session` is the simulated Live Client Session, `/clarifications` is the governed evidence-review workspace, and `/scope` is the POC Scope Studio. `/requirements` is the structured requirement model and evidence inspector. The five later-phase product routes remain labeled placeholders. Phase 6 requires explicit approval.
 
 ## Getting started
 
@@ -38,7 +38,7 @@ npm run format:check
 
 React, strict TypeScript, Vite, Tailwind CSS with its Vite plugin, shadcn/ui, React Router, Zustand, Framer Motion, Lucide React, XYFlow, Recharts, Vitest, React Testing Library, ESLint, and Prettier. Installed versions are recorded in `package.json` and pinned by `package-lock.json`.
 
-The Overview, Live Session, Clarification Center and Scope Studio routes are lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
+The Overview, Live Session, Clarification Center, Scope Studio and Requirement Intelligence routes are lazy-loaded to keep its motion and presentation code separate from the foundation bundle. The Overview uses an evidence transformation panel, connected workflow ribbon, catalog-derived telemetry, five differentiation modules, and a conceptual process comparison. Start Demo resets the entire store and navigates to `/session` without starting playback. Explore Workflow scrolls to and focuses the journey; reduced motion disables smooth scrolling and entrance motion.
 
 The shadcn Button is local source in `src/components/ui`; `components.json` and the `@/` alias support adding components later. Semantic CSS tokens define intentionally designed light and dark themes: royal blue, cool white/pale blue surfaces in light mode, navy/blue-charcoal surfaces in dark mode, and restrained cyan/violet accents. The header uses an HCLTech typographic brand area and explicitly labels the experience “Internal Concept Prototype,” not an approved production product. The accessible theme switch stores a local presentation preference independently of demo state; dark remains the default, and the saved preference applies before paint. No official logo asset or remote brand dependency is introduced. Framer Motion's provider respects the user's reduced-motion preference. XYFlow and Recharts are installed for future phases and are not imported into the initial bundle.
 
@@ -47,8 +47,10 @@ The shadcn Button is local source in `src/components/ui`; `components.json` and 
 - `src/app/`: shared route metadata, router, and providers.
 - `src/components/shell/`: responsive navigation, engagement top bar, and demo controls.
 - `src/components/common/` and `src/components/ui/`: reusable presentation primitives.
-- `src/pages/`: approved Overview, Live Session, Clarification Center, Scope Studio and explicitly labeled phase placeholders.
+- `src/pages/`: approved Overview, Live Session, Clarification Center, Scope Studio, Requirement Intelligence and explicitly labeled phase placeholders.
 - `src/components/clarifications/`: queue, five-stage evidence workspace, consultant approval actions and impact/history panel.
+- `src/components/requirements/`: structured model visual, shared readiness breakdown, filtered catalog, evidence and relationship inspector.
+- `src/store/requirementSelectors.ts`: status, capture, canonical relationship, filtering and model quality selectors.
 - `src/components/scope/`: scope funnel, decision board, evidence inspector, success contract and consultant approval gate.
 - `src/store/scopeSelectors.ts`: derived decisions, complexity, review coverage and generation readiness.
 - `src/types/domain.ts`: requirements, transcript, scope, agents, validation, artifact graph, feedback, and version types.
@@ -102,7 +104,19 @@ Approve POC Scope & Create Baseline creates a frozen `PocBaseline` for RB-001 / 
 
 Requirement readiness stays on the shared Phase 3/4 model: full capture plus all three consultant reviews reaches 100%, rather than substituting the illustrative 93% example. Scope readiness separately represents five prerequisite reviews plus approval: 83% when reviews are complete and 100% after approval. Generation readiness is Awaiting approval, Ready, or Review required. Reopening or changing clarification review history after approval preserves the immutable RB-001 snapshot and returns generation readiness to Review required. Creating a replacement baseline is deferred to a later authorized phase.
 
-The Clarification Center exposes Continue to POC Scope only after all three reviews are confirmed. Scope evidence links retain `/clarifications?selected=...` and `/session?source=...`; requirement links retain `/requirements?selected=...` on the existing placeholder. The board has three decision groups plus a side inspector at wide desktop sizes, an inspector below the board at 1440/1024, and ordered Included → Mocked → Out of Scope → Inspector → Criteria → Approval sections on mobile. Shared theme tokens, icon/text status, pressed selection, visible focus, restrained motion and reduced-motion handling apply throughout.
+The Clarification Center exposes Continue to POC Scope only after all three reviews are confirmed. Scope evidence links retain `/clarifications?selected=...` and `/session?source=...`; requirement links retain `/requirements?selected=...` in the Phase 5.5 inspector. The board has three decision groups plus a side inspector at wide desktop sizes, an inspector below the board at 1440/1024, and ordered Included → Mocked → Out of Scope → Inspector → Criteria → Approval sections on mobile. Shared theme tokens, icon/text status, pressed selection, visible focus, restrained motion and reduced-motion handling apply throughout.
+
+## Phase 5.5 requirement intelligence
+
+`/requirements` presents the complete recorded canonical model: 8 functional requirements, 4 business rules, 2 non-functional constraints, 3 assumptions and 3 questions. This is a reviewable catalog, not a claim that all records have been captured during current playback. Top-level Total Requirements counts all 20 records; the subtitle identifies each type and separately derives current capture coverage. Confirmed and Needs Clarification count records with those derived statuses, including reviewed questions. Actor totals describe the four canonical roles; capture coverage remains in the shared readiness breakdown. All descriptions, confidence scores, transcript quotes and source timestamps resolve from canonical catalogs.
+
+The original catalog is immutable. `requirementView` adds selected ID, type/status/actor filters and plain-text search to the existing Zustand store. Status uses the governed confirmation selector for functional/rule/non-functional records; unresolved related questions mark unconfirmed outputs Needs Clarification. Live priority confirmations remain independent of formal question review. OQ records become Confirmed only through Clarification Center acceptance. Assumptions are Needs Review until explicitly acknowledged in the Scope review checklist or retained in the approved baseline; they are never silently presented as client facts. Records with unrevealed transcript evidence explicitly say Recorded evidence / capture pending. Brief-derived records show their brief origin rather than attributing them to a client.
+
+`getLiveReadinessBreakdown` exposes the existing six dimensions used by `calculateLiveReadiness`: business problem 25%, actors 15%, core workflow 30%, business rules 15%, scenario-brief coverage 5% and consultant clarification review 10%. Precision is retained until the same overall rounding step. The page does not add integration or success-criteria weights. Readiness remains 0% initially, 90% after complete capture, 93% after priority review and 100% after all three reviews. Catalog quality is separate and explicitly illustrative: source linkage includes transcript or brief; confirmation includes derived confirmed records; clarified coverage counts reviewed questions; scope linkage counts direct or canonical evidence relationships. No implementation coverage is claimed.
+
+The inspector shows full content, exact source, actors, related rules/assumptions, clarification evidence, effective scope decisions and success criteria. Relationships use shared transcript sources, canonical clarification outputs and existing scope references. They do not introduce new canonical requirement IDs or a full graph. Type and actor filters, status selection and search work without mutating downstream decisions. Selection brings the inspector into view and focuses it; reduced motion uses immediate scrolling. At desktop the catalog and inspector sit side by side; at 1024 and mobile they stack in readable order.
+
+Links preserve `/requirements?selected=...`, `/session?source=...`, `/clarifications?selected=...` and `/scope?selected=...`. Live Session adds an inspection link; clarification impact adds requirement links; Scope honors selected scope IDs and clears that parameter on reset. Scope editing, clarification acceptance and baseline approval stay in their existing workspaces. No generation behavior, requirement editing, backend or real extraction is implemented.
 
 ## Mock data model and integrity
 
@@ -118,7 +132,7 @@ Catalog counts derive from the records. Overview metrics derive from the canonic
 | ----------------- | ------------------------ | -------------------- |
 | `/`               | Overview                 | 2                    |
 | `/session`        | Live Session             | 3                    |
-| `/requirements`   | Requirement Intelligence | 4                    |
+| `/requirements`   | Requirement Intelligence | 5.5                  |
 | `/clarifications` | Clarification Center     | 4                    |
 | `/scope`          | POC Scope                | 5                    |
 | `/generation`     | Generation               | 6                    |
