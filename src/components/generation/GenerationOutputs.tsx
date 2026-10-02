@@ -264,47 +264,59 @@ export function TestSummary() {
         })}
       </p>
       <div className="gen-test-contract">
-        {successCriteria
-          .filter((c) => state.pocBaseline?.successCriteriaIds.includes(c.id))
-          .map((c) => (
-            <article key={c.id}>
-              <div>
-                <code>{c.id}</code>
-                <p>
-                  {
-                    requirements.find((r) => r.id === c.requirementIds[0])
-                      ?.description
-                  }
-                </p>
-                <RequirementLinks ids={c.requirementIds} />
-              </div>
-              <ArrowDown size={17} aria-hidden="true" />
-              <ul>
-                {tests
-                  .filter((t) => t.successCriterionId === c.id)
-                  .map((t) => (
-                    <li key={t.id}>
-                      <code>{t.id}</code>
-                      <span>{t.label}</span>
-                      <strong>
-                        {state.generation.testResults[t.id] === 'passed'
-                          ? '✓ PASS'
-                          : state.generation.testResults[t.id] === 'failed'
-                            ? '✕ FAIL'
-                            : state.generation.testResults[t.id] === 'generated'
-                              ? '○ Generated'
-                              : '○ Planned'}
-                      </strong>
-                    </li>
-                  ))}
-              </ul>
-            </article>
-          ))}
+        {[
+          ...successCriteria
+            .filter((c) => state.pocBaseline?.successCriteriaIds.includes(c.id))
+            .map((c) => ({
+              ...c,
+              tests: tests.filter((t) => t.successCriterionId === c.id),
+            })),
+          ...tests
+            .filter((t) => !t.successCriterionId)
+            .map((t) => ({
+              id: t.requirementIds[0]!,
+              requirementIds: t.requirementIds,
+              tests: [t],
+            })),
+        ].map((c) => (
+          <article key={c.id}>
+            <div>
+              <code>{c.id}</code>
+              <p>
+                {
+                  requirements.find((r) => r.id === c.requirementIds[0])
+                    ?.description
+                }
+              </p>
+              <RequirementLinks ids={c.requirementIds} />
+            </div>
+            <ArrowDown size={17} aria-hidden="true" />
+            <ul>
+              {c.tests.map((t) => (
+                <li key={t.id}>
+                  <code>{t.id}</code>
+                  <span>{t.label}</span>
+                  <strong>
+                    {state.generation.testResults[t.id] === 'passed'
+                      ? '✓ PASS'
+                      : state.generation.testResults[t.id] === 'failed'
+                        ? '✕ FAIL'
+                        : state.generation.testResults[t.id] === 'generated'
+                          ? '○ Generated'
+                          : '○ Planned'}
+                  </strong>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </div>
       <footer>
         Current-v1 checks derived from{' '}
-        {state.pocBaseline?.successCriteriaIds.length} approved criteria. Future
-        P2 change test TC-016 remains deferred.
+        {state.pocBaseline?.successCriteriaIds.length} approved criteria
+        {tests.some((t) => !t.successCriterionId) &&
+          ` and ${tests.filter((t) => !t.successCriterionId).length} requirement checks`}
+        . Future P2 change test TC-016 remains deferred.
       </footer>
     </section>
   );
@@ -417,7 +429,7 @@ export function HumanReviewGate() {
       )}
       <p className="sr-only" role="status" aria-live="polite">
         {ready
-          ? 'Simulated POC ready for human review. Preview content is planned for Phase 7.'
+          ? 'Simulated POC ready for human review. Open POC Review for internal consultant approval.'
           : 'Engineering validation pending.'}
       </p>
     </section>

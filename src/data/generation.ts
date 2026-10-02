@@ -47,6 +47,20 @@ export const engineeringTests: EngineeringTest[] = [
     successCriterionId: 'SC-006',
     category: 'UI',
   },
+  {
+    id: 'TC-021',
+    label: 'Employee can view their submitted requests',
+    requirementIds: ['FR-002'],
+    artifactIds: ['list-screen', 'list-api'],
+    category: 'UI',
+  },
+  {
+    id: 'TC-022',
+    label: 'Request details show chronological request history',
+    requirementIds: ['FR-005'],
+    artifactIds: ['detail-screen', 'detail-api'],
+    category: 'UI',
+  },
 ];
 const allCore = requirements
   .filter(
@@ -181,7 +195,7 @@ export const engineeringArtifacts: EngineeringArtifact[] = [
       'test',
       t.requirementIds,
     ),
-    successCriterionIds: [t.successCriterionId],
+    successCriterionIds: t.successCriterionId ? [t.successCriterionId] : [],
   })),
   make(
     'security-report',
@@ -249,10 +263,19 @@ export function getBaselineArtifacts(
   }));
 }
 export function getBaselineTests(baseline: PocBaseline) {
-  return engineeringTests.filter(
-    (t) =>
-      baseline.successCriteriaIds.includes(t.successCriterionId) &&
-      successCriteria.some((c) => c.id === t.successCriterionId),
+  return engineeringTests.filter((t) =>
+    t.successCriterionId
+      ? baseline.successCriteriaIds.includes(t.successCriterionId) &&
+        successCriteria.some((c) => c.id === t.successCriterionId)
+      : t.requirementIds.every(
+          (id) =>
+            baseline.requirementIds.includes(id) &&
+            scopeItems.some(
+              (item) =>
+                item.requirementIds.includes(id) &&
+                baseline.decisions[item.id]?.decision !== 'excluded',
+            ),
+        ),
   );
 }
 export const sandboxPlan = {

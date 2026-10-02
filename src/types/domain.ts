@@ -190,7 +190,8 @@ export interface EngineeringTest {
   id: string;
   label: string;
   requirementIds: string[];
-  successCriterionId: string;
+  successCriterionId?: string;
+  artifactIds?: string[];
   category: 'API' | 'Workflow' | 'UI';
 }
 export interface GenerationRuntime {

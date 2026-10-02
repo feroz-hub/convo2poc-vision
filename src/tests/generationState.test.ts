@@ -213,7 +213,20 @@ describe('governed generation engine', () => {
             c.requirementIds.some((id) => t.requirementIds.includes(id)),
         ),
       ).toBe(true);
-    expect(tests).toHaveLength(9);
+    expect(tests).toHaveLength(engineeringTests.length);
+    expect(new Set(tests.map((t) => t.id)).size).toBe(tests.length);
+    for (const t of tests) {
+      for (const id of t.requirementIds)
+        expect(requirements.some((r) => r.id === id)).toBe(true);
+      for (const id of t.artifactIds ?? [])
+        expect(
+          outputs.some(
+            (a) =>
+              a.id === id &&
+              a.requirementIds.some((r) => t.requirementIds.includes(r)),
+          ),
+        ).toBe(true);
+    }
   });
   it('honors approved scope overrides and preserves immutable catalogs', () => {
     const a = useDemoStore.getState();
@@ -240,6 +253,11 @@ describe('governed generation engine', () => {
     const initial = JSON.stringify({ requirements, scopeItems });
     const outputs = getBaselineArtifacts(useDemoStore.getState().pocBaseline!);
     expect(outputs.some((a) => a.id === 'list-screen')).toBe(false);
+    expect(
+      getBaselineTests(useDemoStore.getState().pocBaseline!).some(
+        (t) => t.id === 'TC-021',
+      ),
+    ).toBe(false);
     expect(outputs.some((a) => a.id === 'dependency-scope-email')).toBe(true);
     a.startGeneration();
     a.tick(80000);

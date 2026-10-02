@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { createPocRuntime, applyPocAction } from '@/simulation/pocRuntime';
+import { selectPreviewReady, selectPreviewScopeGaps } from './previewSelectors';
+import type { PocRuntime, PocAction } from '@/types/pocRuntime';
 import { scopeItems, successCriteria } from '@/data/scope';
 import { canApproveScope } from './scopeSelectors';
 import { selectGovernedRequirementIds } from './clarificationSelectors';
@@ -29,6 +32,7 @@ import type { DemoStage } from '@/simulation/stages';
 import { advanceSession } from '@/simulation/demoEngine';
 import { sessionEvents } from '@/simulation/sessionEvents';
 export interface DemoState {
+  pocRuntime: PocRuntime;
   generation: GenerationRuntime;
   requirementView: RequirementView;
   selectedScopeItemId: string;
@@ -70,6 +74,7 @@ export interface DemoState {
   demoSpeed: number;
 }
 export const createInitialDemoState = (): DemoState => ({
+  pocRuntime: createPocRuntime(),
   requirementView: {
     selectedId: 'FR-007',
     type: 'all',
@@ -120,6 +125,8 @@ export const createInitialDemoState = (): DemoState => ({
   demoSpeed: 1,
 });
 interface DemoActions {
+  performPocAction: (action: PocAction) => void;
+  resetPocData: () => void;
   startGeneration: () => void;
   pauseGeneration: () => void;
   resumeGeneration: () => void;
@@ -175,6 +182,19 @@ const history = (
 ];
 export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
   ...createInitialDemoState(),
+  performPocAction: (action) => {
+    const state = get();
+    if (!selectPreviewReady(state) || !state.pocBaseline) return;
+    if (
+      action.type === 'approve-review' &&
+      selectPreviewScopeGaps(state).length
+    )
+      return;
+    set({
+      pocRuntime: applyPocAction(state.pocRuntime, action, state.pocBaseline),
+    });
+  },
+  resetPocData: () => set({ pocRuntime: createPocRuntime() }),
   startGeneration: () => {
     const state = get();
     if (
@@ -245,6 +265,7 @@ export const useDemoStore = create<DemoState & DemoActions>()((set, get) => ({
           {
             ...state,
             ...createEngineeringState(),
+            pocRuntime: createPocRuntime(),
             generation: {
               ...createEngineeringState().generation,
               status: 'running',

@@ -119,6 +119,33 @@ describe('AI Generation Command Center', () => {
       elapsed,
     );
   });
+  it('exposes dedicated request-list and history checks in completed validation and Test Agent outputs', async () => {
+    const state = approveGenerationBaseline();
+    state.startGeneration();
+    state.tick(80000);
+    await renderGeneration();
+    const validation = within(
+      screen.getByRole('region', { name: 'Success-criterion validation' }),
+    );
+    for (const id of ['TC-021', 'TC-022']) {
+      const test = engineeringTests.find((t) => t.id === id)!;
+      const row = validation.getByText(id).closest('article')!;
+      expect(row).toHaveTextContent(test.requirementIds[0]!);
+      expect(row).toHaveTextContent(test.label);
+      expect(row).toHaveTextContent('✓ PASS');
+    }
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole('button', { name: 'Inspect Test Agent: Completed' }),
+    );
+    const inspector = screen.getByRole('complementary', {
+      name: 'Agent inspector',
+    });
+    for (const id of ['TC-021', 'TC-022'])
+      expect(inspector).toHaveTextContent(
+        engineeringTests.find((t) => t.id === id)!.label,
+      );
+  });
   it('selects agents with keyboard controls and exposes inputs, outputs and requirement evidence links', async () => {
     approveGenerationBaseline();
     await renderGeneration();
@@ -165,7 +192,7 @@ describe('AI Generation Command Center', () => {
       screen.getByRole('complementary', { name: 'Artifact inspector' }),
     ).toHaveTextContent('no source files created');
   });
-  it('completes test mapping and opens the unchanged Phase 7 placeholder', async () => {
+  it('completes test mapping and opens the governed POC review', async () => {
     const a = approveGenerationBaseline();
     const router = await renderGeneration();
     act(() => {
@@ -188,8 +215,13 @@ describe('AI Generation Command Center', () => {
     await userEvent
       .setup()
       .click(screen.getByRole('link', { name: 'Open POC Review ↗' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Generated POC Review' }),
+    ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/preview');
-    expect(screen.getByText('Planned for Phase 7')).toBeInTheDocument();
+    expect(
+      screen.getByRole('region', { name: 'ServiceFlow POC application' }),
+    ).toBeInTheDocument();
   });
   it('scope approval enables navigation but does not auto-start generation', async () => {
     approveGenerationBaseline();

@@ -78,7 +78,19 @@ export const routeObjects: RouteObject[] = [
                             .GenerationPage,
                         }),
                       }
-                    : { element: <StagePlaceholder route={route} /> }),
+                    : route.path === '/preview'
+                      ? {
+                          hydrateFallbackElement: (
+                            <section className="page-content" role="status">
+                              Preparing Generated POC Review…
+                            </section>
+                          ),
+                          lazy: async () => ({
+                            Component: (await import('@/pages/PreviewPage'))
+                              .PreviewPage,
+                          }),
+                        }
+                      : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',
