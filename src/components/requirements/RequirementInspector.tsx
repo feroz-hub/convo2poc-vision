@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import { ScanSearch, ArrowDown, UsersRound } from 'lucide-react';
 import { transcript } from '@/data/transcript';
@@ -20,6 +21,7 @@ import { selectScopeDecision } from '@/store/scopeSelectors';
 import { RequirementStatus } from './RequirementStatus';
 import type { Requirement } from '@/types/domain';
 export function RequirementInspector({ item }: { item: Requirement }) {
+  const demoTarget = useDemoTarget('requirement-fr007');
   const state = useDemoStore();
   const source = transcript.find((m) => m.id === item.sourceMessageId);
   const related = getRequirementRelationships(item);
@@ -33,6 +35,7 @@ export function RequirementInspector({ item }: { item: Requirement }) {
   );
   return (
     <aside
+      {...demoTarget}
       id="requirement-inspector"
       className="ri-inspector"
       tabIndex={-1}

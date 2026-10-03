@@ -25,6 +25,7 @@ import {
 import { sandboxPlan } from '@/data/generation';
 import '@/styles/preview.css';
 export function PreviewPage() {
+  const controlled = useDemoStore((s) => s.director.mode === 'autopilot');
   const original = useDemoStore();
   const selectPocVersion = original.selectPocVersion;
   const [params, setParams] = useSearchParams();
@@ -140,7 +141,11 @@ export function PreviewPage() {
           <Link className="preview-primary" to="/generation">
             View Generation Progress ↗
           </Link>
-          <button className="preview-text-button" onClick={state.reset}>
+          <button
+            disabled={controlled}
+            className="preview-text-button"
+            onClick={state.reset}
+          >
             Reset Scenario
           </button>
         </section>
@@ -205,7 +210,7 @@ export function PreviewPage() {
                     <Eye size={15} />
                     {runtime.evidenceOpen ? 'Hide Evidence' : 'Show Evidence'}
                   </button>
-                  <button onClick={state.reset}>
+                  <button disabled={controlled} onClick={state.reset}>
                     <RotateCcw size={14} />
                     Reset Scenario
                   </button>

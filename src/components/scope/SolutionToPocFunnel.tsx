@@ -1,14 +1,17 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { ArrowRight, BrainCircuit, ShieldCheck, Layers3 } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useDemoStore } from '@/store/demoStore';
 import { selectScopeSummary } from '@/store/scopeSelectors';
 export function SolutionToPocFunnel() {
+  const demoTarget = useDemoTarget('scope-funnel');
   const counts = useDemoStore(useShallow(selectScopeSummary));
   const reduced = useReducedMotion();
   const approved = useDemoStore((s) => s.scopeApproved);
   return (
     <section
+      {...demoTarget}
       className="scope-funnel"
       aria-label="Full solution to governed prototype"
     >

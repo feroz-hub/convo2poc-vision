@@ -32,10 +32,14 @@ const renderOverview = async () => {
       <RouterProvider router={router} />
     </AppProviders>,
   );
-  await screen.findByRole('heading', {
-    level: 1,
-    name: 'Turn client conversations into validated working POCs',
-  });
+  await screen.findByRole(
+    'heading',
+    {
+      level: 1,
+      name: 'Turn client conversations into validated working POCs',
+    },
+    { timeout: 5000 },
+  );
   return router;
 };
 describe('Overview executive command center', () => {
@@ -57,7 +61,9 @@ describe('Overview executive command center', () => {
     expect(
       screen.getByText('From conversation to clarity to working prototype.'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Start Demo' })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: 'Explore Manually' }),
+    ).toBeEnabled();
     expect(
       screen.getByRole('button', { name: 'Explore Workflow' }),
     ).toBeEnabled();
@@ -193,7 +199,7 @@ describe('Overview executive command center', () => {
     expect(within(visual).getByText('POC v2')).toBeInTheDocument();
     expect(within(visual).getByText('Human approval')).toBeInTheDocument();
   });
-  it('Start Demo restores the entire canonical initial state and navigates without playback', async () => {
+  it('Explore Manually restores the entire canonical initial state and navigates without playback', async () => {
     useDemoStore.setState({
       isRunning: true,
       isPaused: true,
@@ -210,7 +216,7 @@ describe('Overview executive command center', () => {
     const router = await renderOverview();
     await userEvent
       .setup()
-      .click(screen.getByRole('button', { name: 'Start Demo' }));
+      .click(screen.getByRole('button', { name: 'Explore Manually' }));
     await screen.findByRole('heading', { level: 1, name: 'Live Session' });
     expect(router.state.location.pathname).toBe('/session');
     expect(useDemoStore.getState()).toMatchObject(createInitialDemoState());

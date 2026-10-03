@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { memo } from 'react';
 import {
   ReactFlow,
@@ -139,6 +140,7 @@ const connections = [
   ['deployment', 'review'],
 ];
 export function AgentOrchestrationGraph() {
+  const demoTarget = useDemoTarget('generation-parallel');
   const state = useDemoStore();
   const reduced = useReducedMotion();
   const nodes: AgentNode[] = [
@@ -198,6 +200,7 @@ export function AgentOrchestrationGraph() {
   });
   return (
     <section
+      {...demoTarget}
       className="gen-panel gen-orchestration"
       aria-labelledby="orchestration-title"
     >

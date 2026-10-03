@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
@@ -44,6 +45,7 @@ function IntelligenceSummary() {
   );
 }
 function AmbiguityAlert() {
+  const demoTarget = useDemoTarget('session-ambiguity');
   const open = useDemoStore((s) => s.openClarificationIds);
   const visible = useDemoStore((s) => s.visibleTranscriptMessageIds);
   const insights = useDemoStore((s) => s.visibleInsightEventIds);
@@ -64,6 +66,7 @@ function AmbiguityAlert() {
   );
   return (
     <aside
+      {...demoTarget}
       className={`ambiguity-alert ${priorityConfirmed ? 'answer-confirmed' : ''}`}
       aria-labelledby="ambiguity-title"
     >
@@ -186,11 +189,13 @@ export function InsightEventCard({ event }: { event: LiveInsightEvent }) {
   );
 }
 export function LiveIntelligencePanel() {
+  const demoTarget = useDemoTarget('session-requirement-detection');
   const ids = useDemoStore((s) => s.visibleInsightEventIds);
   const latest = liveInsights.find((i) => i.id === ids.at(-1));
   const reduced = useReducedMotion();
   return (
     <section
+      {...demoTarget}
       className="intelligence-panel session-panel"
       aria-labelledby="intelligence-title"
     >

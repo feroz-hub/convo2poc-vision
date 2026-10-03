@@ -1,3 +1,5 @@
+import { GuidedControls } from '@/components/demo/GuidedControls';
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -34,6 +36,7 @@ import {
 } from '@/components/generation/GenerationOutputs';
 import '@/styles/generation.css';
 export function GenerationPage() {
+  const baselineTarget = useDemoTarget('generation-baseline');
   const page = useRef<HTMLDivElement>(null);
   useEffect(() => {
     page.current?.scrollIntoView?.({ block: 'start', behavior: 'auto' });
@@ -122,6 +125,7 @@ export function GenerationPage() {
       ) : (
         <>
           <section
+            {...baselineTarget}
             className="gen-baseline-input"
             aria-label="Approved baseline input"
           >
@@ -157,73 +161,76 @@ export function GenerationPage() {
               recorded requirements as evidence.
             </p>
           </section>
-          <section
-            className="gen-control-deck"
-            aria-label="Generation controls"
-          >
-            <div className="gen-overall-progress">
-              <span>
-                Generation Progress <strong>{summary.progress}%</strong>
-              </span>
-              <progress
-                aria-label="Overall generation progress"
-                value={summary.progress}
-                max={100}
-              />
-              <small>
-                {summary.complete}/{state.agentStatuses.length} stages complete
-                · {summary.active} active · {formatGenerationTime(g.elapsedMs)}{' '}
-                / {formatGenerationTime(generationDurationMs)}
-              </small>
-            </div>
-            <div className="gen-controls">
-              {g.status === 'idle' && (
-                <Button onClick={state.startGeneration}>
-                  <Play size={15} />
-                  Start Generation
+          <GuidedControls>
+            <section
+              className="gen-control-deck"
+              aria-label="Generation controls"
+            >
+              <div className="gen-overall-progress">
+                <span>
+                  Generation Progress <strong>{summary.progress}%</strong>
+                </span>
+                <progress
+                  aria-label="Overall generation progress"
+                  value={summary.progress}
+                  max={100}
+                />
+                <small>
+                  {summary.complete}/{state.agentStatuses.length} stages
+                  complete · {summary.active} active ·{' '}
+                  {formatGenerationTime(g.elapsedMs)} /{' '}
+                  {formatGenerationTime(generationDurationMs)}
+                </small>
+              </div>
+              <div className="gen-controls">
+                {g.status === 'idle' && (
+                  <Button onClick={state.startGeneration}>
+                    <Play size={15} />
+                    Start Generation
+                  </Button>
+                )}
+                {g.status === 'running' && (
+                  <Button variant="outline" onClick={state.pauseGeneration}>
+                    <Pause size={15} />
+                    Pause Generation
+                  </Button>
+                )}
+                {g.status === 'paused' && (
+                  <Button onClick={state.resumeGeneration}>
+                    <Play size={15} />
+                    Resume Generation
+                  </Button>
+                )}
+                {g.status !== 'completed' && g.status !== 'failed' && (
+                  <Button variant="outline" onClick={state.nextGenerationEvent}>
+                    <SkipForward size={15} />
+                    Next Event
+                  </Button>
+                )}
+                {g.status !== 'idle' && (
+                  <Button variant="outline" onClick={state.restartGeneration}>
+                    <RotateCcw size={15} />
+                    Restart Generation
+                  </Button>
+                )}
+                <Button variant="ghost" onClick={state.reset}>
+                  Reset Scenario
                 </Button>
-              )}
-              {g.status === 'running' && (
-                <Button variant="outline" onClick={state.pauseGeneration}>
-                  <Pause size={15} />
-                  Pause Generation
-                </Button>
-              )}
-              {g.status === 'paused' && (
-                <Button onClick={state.resumeGeneration}>
-                  <Play size={15} />
-                  Resume Generation
-                </Button>
-              )}
-              {g.status !== 'completed' && g.status !== 'failed' && (
-                <Button variant="outline" onClick={state.nextGenerationEvent}>
-                  <SkipForward size={15} />
-                  Next Event
-                </Button>
-              )}
-              {g.status !== 'idle' && (
-                <Button variant="outline" onClick={state.restartGeneration}>
-                  <RotateCcw size={15} />
-                  Restart Generation
-                </Button>
-              )}
-              <Button variant="ghost" onClick={state.reset}>
-                Reset Scenario
-              </Button>
-              <label>
-                Demo speed
-                <select
-                  aria-label="Generation demo speed"
-                  value={state.demoSpeed}
-                  onChange={(e) => state.setDemoSpeed(Number(e.target.value))}
-                >
-                  <option value={1}>1×</option>
-                  <option value={2}>2×</option>
-                  <option value={4}>4×</option>
-                </select>
-              </label>
-            </div>
-          </section>
+                <label>
+                  Demo speed
+                  <select
+                    aria-label="Generation demo speed"
+                    value={state.demoSpeed}
+                    onChange={(e) => state.setDemoSpeed(Number(e.target.value))}
+                  >
+                    <option value={1}>1×</option>
+                    <option value={2}>2×</option>
+                    <option value={4}>4×</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+          </GuidedControls>
           <div className="gen-workspace">
             <AgentOrchestrationGraph />
             <div id="generation-inspector-anchor" tabIndex={-1}>

@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Check, TriangleAlert, ArrowRight, FlaskConical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -12,6 +13,7 @@ import {
   selectScopeDecision,
 } from '@/store/scopeSelectors';
 export function ScopeContract() {
+  const demoTarget = useDemoTarget('scope-success');
   const state = useDemoStore();
   const covered = selectSuccessCoverage(state);
   const included = scopeItems.filter(
@@ -22,7 +24,11 @@ export function ScopeContract() {
   );
   return (
     <div className="scope-contract">
-      <section className="scope-success" aria-labelledby="scope-success-title">
+      <section
+        {...demoTarget}
+        className="scope-success"
+        aria-labelledby="scope-success-title"
+      >
         <header>
           <h2 id="scope-success-title">POC success criteria</h2>
           <span>

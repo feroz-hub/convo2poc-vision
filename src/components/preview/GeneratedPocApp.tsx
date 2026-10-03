@@ -1,3 +1,5 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
+import { GuidedControls } from '@/components/demo/GuidedControls';
 import { useState } from 'react';
 import {
   ArrowLeft,
@@ -418,6 +420,13 @@ function CreateRequestForm() {
 }
 function RequestDetail() {
   const state = usePreviewState();
+  const demoTarget = useDemoTarget(
+    state.director.requestIds.p2v2 && state.currentPocVersion === 'v2'
+      ? 'preview-v2-p2'
+      : state.director.requestIds.p2v1
+        ? 'preview-v1-p2'
+        : 'preview-p1-approval',
+  );
   const runtime = state.pocRuntime;
   const r = runtime.requests.find((r) => r.id === runtime.selectedRequestId);
   const user = pocUsers.find((u) => u.id === runtime.userId)!;
@@ -458,7 +467,7 @@ function RequestDetail() {
           {r.priority}
         </span>
       </div>
-      <dl className="poc-detail-meta">
+      <dl {...demoTarget} className="poc-detail-meta">
         <div>
           <dt>Status</dt>
           <dd>
@@ -696,116 +705,118 @@ export function GeneratedPocApp() {
     { route: 'create', label: 'Create Request', icon: Plus },
   ] as const;
   return (
-    <section
-      className="sandbox-browser"
-      aria-label="ServiceFlow POC application"
-    >
-      <div className="sandbox-browser-bar">
-        <span className="sandbox-dots" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
-        <span>
-          <ShieldCheck size={13} />
-          c2p-poc-001.internal
-        </span>
-        <span>Simulated Sandbox</span>
-      </div>
-      <div className="poc-app">
-        <header className="poc-app-header">
-          <div className="poc-wordmark">
-            <span>
-              <ClipboardList size={20} />
-            </span>
-            <div>
-              <strong>
-                ServiceFlow<span> POC</span>
-              </strong>
-              <small>Acme Enterprise Services</small>
-            </div>
-          </div>
-          <div className="poc-identity">
-            <label>
-              Demo Identity
-              <select
-                aria-label="Demo role"
-                value={user.role}
-                onChange={(e) =>
-                  state.performPocAction({
-                    type: 'role',
-                    role: e.target.value as PocRole,
-                  })
-                }
-              >
-                {Object.entries(pocRoleLabels).map(([role, label]) => (
-                  <option key={role} value={role}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <FeatureEvidenceButton id="identity" label="Demo Identity" />
-            <span
-              className="poc-avatar"
-              title={user.name}
-              aria-label={user.name}
-            >
-              {user.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </span>
-          </div>
-        </header>
-        <nav className="poc-navigation" aria-label="ServiceFlow navigation">
-          {nav
-            .filter(
-              (n) =>
-                featureAvailable(state.pocBaseline, n.route) &&
-                (n.route !== 'create' || user.role === 'employee'),
-            )
-            .map((n) => (
-              <button
-                key={n.route}
-                aria-current={runtime.route === n.route ? 'page' : undefined}
-                onClick={() =>
-                  state.performPocAction({ type: 'navigate', route: n.route })
-                }
-              >
-                <n.icon size={15} />
-                {n.label}
-              </button>
-            ))}
-          <span>
-            {state.pocBaseline?.id} · {state.pocBaseline?.version}
+    <GuidedControls>
+      <section
+        className="sandbox-browser"
+        aria-label="ServiceFlow POC application"
+      >
+        <div className="sandbox-browser-bar">
+          <span className="sandbox-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
           </span>
-        </nav>
-        <div className="poc-content">
-          <div className="poc-session-caption">
-            <span>Welcome, {user.name}</span>
-            <span>Synthetic data · {pocRoleLabels[user.role]}</span>
-          </div>
-          {runtime.notice && (
-            <p className="poc-notice" role="status">
-              <Check size={15} />
-              {runtime.notice}
-            </p>
-          )}
-          {runtime.route === 'dashboard' && <PocDashboard />}
-          {runtime.route === 'requests' && <PocRequestList />}
-          {runtime.route === 'create' && <CreateRequestForm />}
-          {runtime.route === 'detail' && (
-            <RequestDetail key={runtime.selectedRequestId} />
-          )}
+          <span>
+            <ShieldCheck size={13} />
+            c2p-poc-001.internal
+          </span>
+          <span>Simulated Sandbox</span>
         </div>
-        <footer className="poc-app-footer">
-          <span>Generated POC · Not Production Ready</span>
-          <button onClick={state.resetPocData} className="poc-text-button">
-            Reset POC Data
-          </button>
-        </footer>
-      </div>
-    </section>
+        <div className="poc-app">
+          <header className="poc-app-header">
+            <div className="poc-wordmark">
+              <span>
+                <ClipboardList size={20} />
+              </span>
+              <div>
+                <strong>
+                  ServiceFlow<span> POC</span>
+                </strong>
+                <small>Acme Enterprise Services</small>
+              </div>
+            </div>
+            <div className="poc-identity">
+              <label>
+                Demo Identity
+                <select
+                  aria-label="Demo role"
+                  value={user.role}
+                  onChange={(e) =>
+                    state.performPocAction({
+                      type: 'role',
+                      role: e.target.value as PocRole,
+                    })
+                  }
+                >
+                  {Object.entries(pocRoleLabels).map(([role, label]) => (
+                    <option key={role} value={role}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <FeatureEvidenceButton id="identity" label="Demo Identity" />
+              <span
+                className="poc-avatar"
+                title={user.name}
+                aria-label={user.name}
+              >
+                {user.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </span>
+            </div>
+          </header>
+          <nav className="poc-navigation" aria-label="ServiceFlow navigation">
+            {nav
+              .filter(
+                (n) =>
+                  featureAvailable(state.pocBaseline, n.route) &&
+                  (n.route !== 'create' || user.role === 'employee'),
+              )
+              .map((n) => (
+                <button
+                  key={n.route}
+                  aria-current={runtime.route === n.route ? 'page' : undefined}
+                  onClick={() =>
+                    state.performPocAction({ type: 'navigate', route: n.route })
+                  }
+                >
+                  <n.icon size={15} />
+                  {n.label}
+                </button>
+              ))}
+            <span>
+              {state.pocBaseline?.id} · {state.pocBaseline?.version}
+            </span>
+          </nav>
+          <div className="poc-content">
+            <div className="poc-session-caption">
+              <span>Welcome, {user.name}</span>
+              <span>Synthetic data · {pocRoleLabels[user.role]}</span>
+            </div>
+            {runtime.notice && (
+              <p className="poc-notice" role="status">
+                <Check size={15} />
+                {runtime.notice}
+              </p>
+            )}
+            {runtime.route === 'dashboard' && <PocDashboard />}
+            {runtime.route === 'requests' && <PocRequestList />}
+            {runtime.route === 'create' && <CreateRequestForm />}
+            {runtime.route === 'detail' && (
+              <RequestDetail key={runtime.selectedRequestId} />
+            )}
+          </div>
+          <footer className="poc-app-footer">
+            <span>Generated POC · Not Production Ready</span>
+            <button onClick={state.resetPocData} className="poc-text-button">
+              Reset POC Data
+            </button>
+          </footer>
+        </div>
+      </section>
+    </GuidedControls>
   );
 }

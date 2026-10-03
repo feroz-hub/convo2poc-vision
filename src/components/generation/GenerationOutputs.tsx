@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import {
   Check,
@@ -231,11 +232,16 @@ export function ApplicationPlan() {
   );
 }
 export function TestSummary() {
+  const demoTarget = useDemoTarget('generation-tests');
   const state = useDemoStore();
   const tests = state.pocBaseline ? getBaselineTests(state.pocBaseline) : [];
   const summary = selectGenerationSummary(state);
   return (
-    <section className="gen-panel" aria-labelledby="test-summary">
+    <section
+      className="gen-panel"
+      aria-labelledby="test-summary"
+      {...demoTarget}
+    >
       <header>
         <div>
           <span className="gen-kicker">
@@ -322,11 +328,12 @@ export function TestSummary() {
   );
 }
 export function SecurityAndSandbox() {
+  const demoTarget = useDemoTarget('generation-sandbox');
   const state = useDemoStore();
   const status = state.buildChecks.find((c) => c.id === 'security')!.status;
   return (
     <div className="gen-lower-grid">
-      <section className="gen-panel">
+      <section {...demoTarget} className="gen-panel">
         <header>
           <div>
             <span className="gen-kicker">Simulated POC security baseline</span>

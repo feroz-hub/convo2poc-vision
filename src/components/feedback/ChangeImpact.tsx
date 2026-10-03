@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import { ArrowDown, FileCheck, Layers, ShieldCheck } from 'lucide-react';
 import { useDemoStore } from '@/store/demoStore';
@@ -9,6 +10,7 @@ import {
   requirementRevisions,
 } from '@/data/feedbackEvolution';
 export function ChangeImpact() {
+  const demoTarget = useDemoTarget('feedback-impact');
   const s = useDemoStore(),
     impact = selectChangeImpact(s);
   const selected = impact.allArtifacts.find(
@@ -16,7 +18,11 @@ export function ChangeImpact() {
   );
   return (
     <>
-      <section className="fb-impact-summary" aria-label="Derived change impact">
+      <section
+        className="fb-impact-summary"
+        {...demoTarget}
+        aria-label="Derived change impact"
+      >
         <dl>
           {[
             ['Requirement revisions', requirementRevisions.length],

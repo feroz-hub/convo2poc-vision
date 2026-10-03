@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -18,6 +19,7 @@ import { scopeItems } from '@/data/scope';
 import { selectScopeDecision } from '@/store/scopeSelectors';
 import '@/styles/traceability.css';
 export function TraceabilityPage() {
+  const traceTarget = useDemoTarget('trace-p1-path');
   const state = useDemoStore();
   const view = state.traceView;
   const setTraceView = state.setTraceView;
@@ -122,6 +124,7 @@ export function TraceabilityPage() {
       </section>
       <div className="tx-workspace">
         <section
+          {...traceTarget}
           className="tx-panel tx-explorer"
           aria-labelledby="evidence-map-title"
         >

@@ -12,6 +12,7 @@ import { RequirementInspector } from '@/components/requirements/RequirementInspe
 import { Button } from '@/components/ui/button';
 import '@/styles/requirements.css';
 export function RequirementsPage() {
+  const controlled = useDemoStore((s) => s.director.mode === 'autopilot');
   const [params, setParams] = useSearchParams();
   const requested = params.get('selected');
   const selected = useDemoStore((s) => s.requirementView.selectedId);
@@ -35,6 +36,8 @@ export function RequirementsPage() {
           <p>Turn conversation into structured, traceable requirements.</p>
         </div>
         <Button
+          disabled={controlled}
+          title={controlled ? 'Controlled by Guided Demo' : undefined}
           variant="outline"
           size="sm"
           onClick={() => {

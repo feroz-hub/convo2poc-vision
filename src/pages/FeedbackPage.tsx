@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import {
   GitCompareArrows,
@@ -21,6 +22,9 @@ import { ChangeImpact } from '@/components/feedback/ChangeImpact';
 import { DeltaGeneration } from '@/components/feedback/DeltaGeneration';
 import '@/styles/feedback.css';
 export function FeedbackPage() {
+  const controlled = useDemoStore((s) => s.director.mode === 'autopilot');
+  const changeTarget = useDemoTarget('feedback-cr001');
+  const baselineTarget = useDemoTarget('feedback-rb002');
   const s = useDemoStore(),
     f = s.feedback,
     cr = changeRequests[0]!;
@@ -37,7 +41,13 @@ export function FeedbackPage() {
           <h1>Client Feedback & Change Impact</h1>
           <p>Turn client feedback into controlled, traceable POC evolution.</p>
         </div>
-        <button onClick={s.restartFeedback}>Restart Feedback Demo</button>
+        <button
+          disabled={controlled}
+          title={controlled ? 'Controlled by Guided Demo' : undefined}
+          onClick={s.restartFeedback}
+        >
+          Restart Feedback Demo
+        </button>
       </header>
       <dl className="fb-summary">
         {[
@@ -131,7 +141,7 @@ export function FeedbackPage() {
             {f.capture.status === 'idle' ? (
               <button
                 className="fb-primary"
-                disabled={!available}
+                disabled={controlled || !available}
                 onClick={s.startFeedback}
               >
                 Run Feedback Demo
@@ -139,7 +149,7 @@ export function FeedbackPage() {
             ) : (
               <>
                 <button
-                  disabled={f.capture.status === 'completed'}
+                  disabled={controlled || f.capture.status === 'completed'}
                   onClick={() =>
                     s.feedbackPlayback(
                       f.capture.status === 'running' ? 'pause' : 'resume',
@@ -151,7 +161,7 @@ export function FeedbackPage() {
                     : 'Resume Feedback'}
                 </button>
                 <button
-                  disabled={f.capture.status === 'completed'}
+                  disabled={controlled || f.capture.status === 'completed'}
                   onClick={() => s.feedbackPlayback('next')}
                 >
                   Next Feedback Event
@@ -164,6 +174,7 @@ export function FeedbackPage() {
           </div>
         </div>
         <section
+          {...changeTarget}
           className="fb-panel fb-detection"
           aria-label="Change request detection"
         >
@@ -222,6 +233,7 @@ export function FeedbackPage() {
         <>
           <ChangeImpact />
           <section
+            {...baselineTarget}
             className="fb-panel fb-approval"
             aria-labelledby="change-review-title"
           >
@@ -245,7 +257,7 @@ export function FeedbackPage() {
             </header>
             {!f.baseline ? (
               <>
-                <fieldset disabled={f.status !== 'analyzed'}>
+                <fieldset disabled={controlled || f.status !== 'analyzed'}>
                   <legend className="sr-only">
                     Change impact review checklist
                   </legend>
@@ -266,6 +278,7 @@ export function FeedbackPage() {
                   <button
                     className="fb-primary"
                     disabled={
+                      controlled ||
                       !selectFeedbackReviewComplete(s) ||
                       !available ||
                       s.pocBaseline?.decisions['scope-FR-007']?.decision !==
@@ -276,13 +289,13 @@ export function FeedbackPage() {
                     Approve CR-001 & Create RB-002
                   </button>
                   <button
-                    disabled={f.status !== 'analyzed'}
+                    disabled={controlled || f.status !== 'analyzed'}
                     onClick={() => s.decideChange('reject')}
                   >
                     Reject Change
                   </button>
                   <button
-                    disabled={f.status !== 'analyzed'}
+                    disabled={controlled || f.status !== 'analyzed'}
                     onClick={() => s.decideChange('clarify')}
                   >
                     Request Clarification
@@ -380,7 +393,11 @@ export function FeedbackPage() {
         production deployment.{' '}
         <Link to="/generation">View preserved v1 generation ↗</Link>
       </p>
-      <button className="fb-text-button" onClick={s.reset}>
+      <button
+        disabled={controlled}
+        className="fb-text-button"
+        onClick={s.reset}
+      >
         Full Scenario Reset
       </button>
     </div>

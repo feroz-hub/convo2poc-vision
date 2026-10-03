@@ -1,3 +1,4 @@
+import { GuidedControls } from '@/components/demo/GuidedControls';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -150,76 +151,80 @@ export function ScopeInspector({ item }: { item: ScopeItem }) {
             </small>
           )}
         </section>
-        <section className="scope-override">
-          <h3>
-            {state.scopeApproved ? (
-              <>
-                <LockKeyhole size={14} aria-hidden="true" />
-                Approved decision locked
-              </>
-            ) : (
-              'Consultant decision'
-            )}
-          </h3>
-          <label htmlFor="scope-override-reason">
-            Override reason <small>(optional local note)</small>
-          </label>
-          <textarea
-            id="scope-override-reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            disabled={state.scopeApproved}
-            placeholder="Explain the scope tradeoff…"
-          />
-          <div className="scope-override-actions">
-            {(['included', 'mocked', 'excluded'] as ScopeDecision[]).map(
-              (value) => (
+        <GuidedControls>
+          <section className="scope-override">
+            <h3>
+              {state.scopeApproved ? (
+                <>
+                  <LockKeyhole size={14} aria-hidden="true" />
+                  Approved decision locked
+                </>
+              ) : (
+                'Consultant decision'
+              )}
+            </h3>
+            <label htmlFor="scope-override-reason">
+              Override reason <small>(optional local note)</small>
+            </label>
+            <textarea
+              id="scope-override-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              disabled={state.scopeApproved}
+              placeholder="Explain the scope tradeoff…"
+            />
+            <div className="scope-override-actions">
+              {(['included', 'mocked', 'excluded'] as ScopeDecision[]).map(
+                (value) => (
+                  <Button
+                    key={value}
+                    variant="outline"
+                    size="sm"
+                    disabled={state.scopeApproved || decision === value}
+                    onClick={() =>
+                      state.setScopeDecision(item.id, value, reason)
+                    }
+                  >
+                    Move to{' '}
+                    {value === 'excluded'
+                      ? 'Out of Scope'
+                      : value === 'mocked'
+                        ? 'Mocked'
+                        : 'Included'}
+                  </Button>
+                ),
+              )}
+              {override && (
                 <Button
-                  key={value}
-                  variant="outline"
                   size="sm"
-                  disabled={state.scopeApproved || decision === value}
-                  onClick={() => state.setScopeDecision(item.id, value, reason)}
+                  variant="outline"
+                  disabled={
+                    state.scopeApproved || reason.trim() === override.reason
+                  }
+                  onClick={() =>
+                    state.setScopeDecision(item.id, decision, reason)
+                  }
                 >
-                  Move to{' '}
-                  {value === 'excluded'
-                    ? 'Out of Scope'
-                    : value === 'mocked'
-                      ? 'Mocked'
-                      : 'Included'}
+                  Save override reason
                 </Button>
-              ),
-            )}
-            {override && (
+              )}
               <Button
                 size="sm"
-                variant="outline"
-                disabled={
-                  state.scopeApproved || reason.trim() === override.reason
-                }
-                onClick={() =>
-                  state.setScopeDecision(item.id, decision, reason)
-                }
+                variant="ghost"
+                disabled={state.scopeApproved || !override}
+                onClick={() => state.resetScopeRecommendation(item.id)}
               >
-                Save override reason
+                Reset recommendation
               </Button>
+            </div>
+            {state.scopeApproved && (
+              <p>
+                Future client changes require a new baseline. This approved
+                scope stays intact.
+              </p>
             )}
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={state.scopeApproved || !override}
-              onClick={() => state.resetScopeRecommendation(item.id)}
-            >
-              Reset recommendation
-            </Button>
-          </div>
-          {state.scopeApproved && (
-            <p>
-              Future client changes require a new baseline. This approved scope
-              stays intact.
-            </p>
-          )}
-        </section>
+          </section>
+        </GuidedControls>
       </div>
     </aside>
   );

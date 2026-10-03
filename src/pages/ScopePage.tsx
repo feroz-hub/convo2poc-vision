@@ -16,6 +16,7 @@ import { ScopeApprovalGate } from '@/components/scope/ScopeApprovalGate';
 import { Button } from '@/components/ui/button';
 import '@/styles/scope.css';
 export function ScopePage() {
+  const controlled = useDemoStore((s) => s.director.mode === 'autopilot');
   const [params, setParams] = useSearchParams();
   const requested = params.get('selected');
   const select = useDemoStore((s) => s.selectScopeItem);
@@ -48,6 +49,8 @@ export function ScopePage() {
           </p>
         </div>
         <Button
+          disabled={controlled}
+          title={controlled ? 'Controlled by Guided Demo' : undefined}
           size="sm"
           variant="outline"
           onClick={() => {

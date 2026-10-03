@@ -11,6 +11,7 @@ import { ClarificationImpactPanel } from '@/components/clarifications/Clarificat
 import { Button } from '@/components/ui/button';
 import '@/styles/clarifications.css';
 export function ClarificationsPage() {
+  const controlled = useDemoStore((s) => s.director.mode === 'autopilot');
   const [resetRevision, setResetRevision] = useState(0);
   const [params, setParams] = useSearchParams();
   const edits = useDemoStore((s) => s.editedClarificationQuestions);
@@ -36,6 +37,8 @@ export function ClarificationsPage() {
           <p>Resolve uncertainty before POC generation.</p>
         </div>
         <Button
+          disabled={controlled}
+          title={controlled ? 'Controlled by Guided Demo' : undefined}
           variant="outline"
           size="sm"
           onClick={() => {

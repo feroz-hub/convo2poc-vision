@@ -1,3 +1,4 @@
+import { useDemoTarget } from '@/components/demo/demoTargets';
 import { Link } from 'react-router-dom';
 import { ArrowDown, FileCheck2, Fingerprint, X } from 'lucide-react';
 import { usePreviewState } from '@/hooks/usePreviewState';
@@ -7,10 +8,15 @@ import { agents } from '@/data/agents';
 import { transcript } from '@/data/transcript';
 import { scopeDecisionLabels } from '@/data/scope';
 export function FeatureEvidencePanel() {
+  const demoTarget = useDemoTarget('preview-feature-evidence');
   const state = usePreviewState();
   const data = selectFeatureEvidence(state, state.pocRuntime.selectedFeatureId);
   return (
-    <aside className="preview-evidence" aria-label="Feature evidence">
+    <aside
+      className="preview-evidence"
+      {...demoTarget}
+      aria-label="Feature evidence"
+    >
       <header>
         <div>
           <span className="preview-kicker">

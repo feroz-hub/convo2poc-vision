@@ -15,7 +15,10 @@ export function OverviewPage() {
   };
   return (
     <div className="overview-page">
-      <OverviewHero onStart={start} />
+      <OverviewHero
+        onStart={useDemoStore.getState().startFullDemo}
+        onManual={start}
+      />
       <WorkflowJourney />
       <StoryboardStrip />
       <ProcessComparison />
