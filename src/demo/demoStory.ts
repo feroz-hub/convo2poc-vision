@@ -431,9 +431,97 @@ export const demoStory: readonly DemoStep[] = [
     action: { type: 'p2-v2' },
   },
   {
+    id: 'value-arrival',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Executive outcome',
+    narration:
+      'The full conversation-to-POC lifecycle now has an evidence-backed executive report.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-time-to-poc',
+  },
+  {
+    id: 'value-timing',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Time to working proof',
+    narration:
+      'The first validated POC was produced through a single governed digital thread. Timing is an illustrative simulation measurement.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-time-to-poc',
+  },
+  {
+    id: 'value-requirements',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Client intent stays structured',
+    narration:
+      'Client intent remained structured and ambiguity was reviewed before generation.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-requirements',
+  },
+  {
+    id: 'value-scope',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'A deliberately focused prototype',
+    narration:
+      'The full client vision was reduced to a focused, consultant-approved POC.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-scope',
+  },
+  {
+    id: 'value-traceability',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Evidence through validation',
+    narration:
+      'Scoped core workflows remain connected to conversation, implementation and validation evidence.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-traceability',
+  },
+  {
+    id: 'value-reuse',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Targeted regeneration',
+    narration:
+      'Client feedback triggered targeted regeneration while unaffected engineering assets were reused.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-reuse',
+  },
+  {
+    id: 'value-versions',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Preserve the original proof',
+    narration:
+      'RB-001 and POC v1 remain preserved while the approved change creates RB-002 and POC v2.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-version-evolution',
+  },
+  {
+    id: 'value-pilot',
+    chapterId: 'outcome',
+    route: '/value',
+    title: 'Validate the value hypothesis',
+    narration:
+      'The next step is to validate these value hypotheses through suitable real presales engagements.',
+    durationMs: 5000,
+    condition: 'v2-ready',
+    spotlight: 'value-pilot',
+  },
+  {
     id: 'complete',
     chapterId: 'outcome',
-    route: '/preview?version=v2',
+    route: '/value',
     title: 'Convo2POC demo complete',
     narration:
       'Conversation became governed working proof, and client feedback became a controlled versioned change.',

@@ -29,18 +29,18 @@ describe('application shell and route placeholders', () => {
         route.path !== '/traceability' &&
         route.path !== '/feedback',
     ),
-  )('renders $path and marks its navigation active', (route) => {
+  )('renders $path and marks its navigation active', async (route) => {
     renderRoute(route.path);
     expect(
-      screen.getByRole('heading', { level: 1, name: route.label }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: route.path === '/value' ? 'Value Creation Report' : route.label,
+      }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: route.label })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    expect(
-      screen.getByText(`Planned for Phase ${route.phase}`),
-    ).toBeInTheDocument();
   });
   it('supports manual navigation independently of demo state', async () => {
     const user = userEvent.setup();
@@ -69,14 +69,18 @@ describe('application shell and route placeholders', () => {
       detectedRequirementIds: ['FR-001'],
     });
     renderRoute('/value');
+    await screen.findByRole('heading', {
+      name: 'Value Creation Report',
+      level: 1,
+    });
     expect(screen.getByRole('button', { name: 'Run Demo' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Reset scenario' }));
-    expect(screen.getByText('POC v1')).toBeInTheDocument();
+    expect(screen.getAllByText('POC v1').length).toBeGreaterThan(0);
     expect(useDemoStore.getState().detectedRequirementIds).toEqual([]);
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'Value Report',
+        name: 'Value Creation Report',
       }),
     ).toBeInTheDocument();
   });

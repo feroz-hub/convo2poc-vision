@@ -116,7 +116,23 @@ export const routeObjects: RouteObject[] = [
                                 ).FeedbackPage,
                               }),
                             }
-                          : { element: <StagePlaceholder route={route} /> }),
+                          : route.path === '/value'
+                            ? {
+                                hydrateFallbackElement: (
+                                  <section
+                                    className="page-content"
+                                    role="status"
+                                  >
+                                    Preparing Value Creation Report…
+                                  </section>
+                                ),
+                                lazy: async () => ({
+                                  Component: (
+                                    await import('@/pages/ValueReportPage')
+                                  ).ValueReportPage,
+                                }),
+                              }
+                            : { element: <StagePlaceholder route={route} /> }),
       })),
       {
         path: '*',

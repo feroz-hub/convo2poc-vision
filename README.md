@@ -219,3 +219,35 @@ Next, Previous and chapter jumps reset and replay the valid story prefix through
 `src/components/demo/demoTargets.ts` registers stable semantic React refs with `data-demo-target` attributes. The director uses these refs for once-per-step scrolling and token-based highlighting; it does not query DOM structure, synthesize mouse clicks or duplicate workflow logic. Spotlights and scrolling respect reduced motion. Narration is presentation copy; source statements, confidence, requirements, artifacts and test results remain in canonical catalogs. The responsive presenter dock provides all controls, a chapter selector and optional presentation navigation; mobile exposes secondary controls through More. Completion summarizes actual reached state, not hard-coded results.
 
 Story validation checks unique step IDs, registered routes, chapters, conditions, actions, targets, canonical references, simulation milestones, governance presentation and terminal transitions. State and UI tests cover the full story, all chapter preparation, gates, pause/resume, speeds, navigation deviations, clock disposal, manual isolation, immutable canonical data and version-specific P2 behavior. To append a future authorized chapter, extend the typed action/condition/target registries and story configuration with actual product transitions; do not add fake readiness flags or a route-only automatic approval.
+
+### Phase 10: Executive Value Creation Report
+
+`/value` is a read-only projection of the existing requirement, clarification,
+scope, generation, traceability and feedback selectors (`valueSelectors.ts`).
+It does not introduce telemetry, a second store, invented ROI or production results.
+Pilot KPIs deliberately retain “To be measured” for both baseline and pilot.
+
+- **Time-to-POC:** discovery workshop simulation start to POC v1 Ready for Human
+  Review. Active deterministic session duration + generation duration (currently
+  80s + 80s). Human governance dwell is untimed and excluded. This is compressed
+  simulation time, not elapsed engagement time, workshop transcript timestamps,
+  or Director presentation duration. Pending until all v1 review-ready checks pass.
+- **Feedback-to-POC-v2:** client feedback capture milestone to validated v2:
+  remaining feedback analysis duration + delta duration (currently 20s − 5s +
+  32s). Pending until shared v2 readiness passes. It excludes the initial v1 cycle.
+- **Artifact reuse:** reused / (reused + modified), using the canonical CR-001
+  baseline impact selector. No unrelated external assets or engineering-hour
+  savings are counted. Zero denominator yields zero. Counts remain visible.
+- **Governance gates:** each consultant clarification confirmation, scope approval,
+  v1 consultant review, CR-001 approval and optional v2 consultant review is one
+  blocking decision. Individual checklist clicks and Director steps are not gates.
+  Ready-for-review is distinct from approval; guided approvals remain disclosed.
+- **Traceability:** reuses Phase 8 scoped core-workflow chains. Mocked identity and
+  deferred capabilities are outside the denominator and explicitly disclosed.
+
+The Director adds eight Outcome spotlights at 5 seconds each after validated v2,
+then completes on `/value`. Default presentation duration is 5m 51s (351s).
+Pause, resume, next, previous, chapter navigation, exit and replay use the existing
+Director and single shared clock. The report uses responsive CSS flow diagrams
+and two distribution bars with textual equivalents, rather than another graph
+or chart dependency. No Phase 11 functionality or export is implemented.

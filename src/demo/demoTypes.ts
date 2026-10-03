@@ -11,6 +11,14 @@ export const demoChapters = [
 ] as const;
 export type DemoChapterId = (typeof demoChapters)[number]['id'];
 export const demoTargets = {
+  'value-time-to-poc': 'Time to validated prototype',
+  'value-requirements': 'Structured client intent',
+  'value-scope': 'Deliberate POC boundary',
+  'value-traceability': 'Scoped workflow evidence',
+  'value-reuse': 'Targeted artifact reuse',
+  'value-version-evolution': 'Preserved versioned baselines',
+  'value-pilot': 'Real engagement pilot recommendation',
+  'value-summary': 'Executive demo outcome',
   'overview-concept': 'Conversation to working proof',
   'session-requirement-detection': 'Live requirement intelligence',
   'session-ambiguity': 'Ambiguity and client evidence',

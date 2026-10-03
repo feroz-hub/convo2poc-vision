@@ -26,7 +26,7 @@ export function DemoCompletion() {
       <span className="demo-complete-icon">
         <GitBranch size={36} />
       </span>
-      <p className="demo-kicker">CONVO2POC DEMO COMPLETE</p>
+      <p className="demo-kicker">CONVO2POC GUIDED DEMO COMPLETE</p>
       <h1 id="demo-complete-title">
         Client intent. Governed evolution. Working proof.
       </h1>
@@ -46,6 +46,12 @@ export function DemoCompletion() {
           ['POC Scope', 'RB-001 approved', !!s.pocBaseline],
           ['POC v1', 'Generated and validated', !!s.pocRuntime.approval],
           [
+            'Validation',
+            'Build, tests and sandbox checked',
+            s.generation.status === 'completed' &&
+              s.buildChecks.every((c) => c.status === 'passed'),
+          ],
+          [
             'Traceability',
             `${selectPreviewTraceability(s).coverage}% for scoped workflows`,
             selectPreviewTraceability(s).coverage === 100,
@@ -56,6 +62,11 @@ export function DemoCompletion() {
             s.approvedChangeIds.includes('CR-001'),
           ],
           ['POC v2', 'Targeted regeneration validated', selectV2Ready(s)],
+          [
+            'Value Report',
+            'Executive evidence ready for review',
+            selectV2Ready(s),
+          ],
         ].map(([title, label, done]) => (
           <li key={String(title)}>
             <Check size={18} />
@@ -68,6 +79,7 @@ export function DemoCompletion() {
       </ol>
       <div className="demo-completion-actions">
         <button onClick={s.exitFullDemo}>Explore Manually</button>
+        <button onClick={() => review('/value')}>Review Value Report</button>
         <button onClick={s.restartFullDemo}>Replay Demo</button>
         <button onClick={() => review('/preview?version=v2')}>
           Review POC v2
